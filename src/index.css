@@ -1,1 +1,87 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 @import "tailwindcss";
+
+/* =========================
+   Typography System
+========================= */
+@layer utilities {
+  .typo-h1 {
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .typo-h2 {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .typo-h3 {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .typo-body {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .typo-body2 {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .typo-caption {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .typo-button {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .typo-label {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+
+/* =========================
+   Animation System
+========================= */
+@keyframes bounceLeft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes bounceRight {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+@layer utilities {
+  .animate-bounce-left {
+    animation: bounceLeft 1s infinite ease-in-out;
+  }
+  .animate-bounce-right {
+    animation: bounceRight 1s infinite ease-in-out;
+  }
+}
