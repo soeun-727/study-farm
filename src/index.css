@@ -1,6 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 @import "tailwindcss";
 
+@theme {
+  --font-sans:
+    "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    sans-serif;
+}
+
 /* =========================
    Typography System
 ========================= */
@@ -51,6 +57,35 @@
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
+  }
+}
+
+/* =========================
+   Color System
+========================= */
+@layer base {
+  :root {
+    /* Gray scale */
+    --gray-0: #ffffff;
+    --gray-100: #fbfbfd;
+    --gray-200: #f0f0f7;
+    --gray-300: #e4e4eb;
+    --gray-400: #d0d0d6;
+    --gray-500: #b3b3ba;
+    --gray-600: #84848a;
+    --gray-700: #6d6d73;
+    --gray-800: #2f2f33;
+    --gray-900: #1b1b1e;
+
+    /* Primary */
+    --primary-brown: #875c20;
+    --primary-light-brown: #f5f1e5;
+    --primary-orange: #fda529;
+    --primary-yellow: #ffee6b;
+  }
+
+  body {
+    background-color: var(--primary-light-brown);
   }
 }
 
