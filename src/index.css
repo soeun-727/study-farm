@@ -84,6 +84,7 @@
     --primary-yellow: #ffee6b;
   }
 
+  html,
   body {
     background-color: var(--primary-light-brown);
   }
