@@ -38,7 +38,7 @@ const DoublecheckModal: React.FC<DoublecheckModalProps> = ({
   if (!isOpen) return null;
 
   const isSingular = variant === "singular";
-  const confirmBtnColor = "bg-gray-900";
+  const confirmBtnColor = "bg-(--gray-900)";
   const buttonWidth = isSingular ? "w-[184px]" : "w-[95px]";
 
   return createPortal(
