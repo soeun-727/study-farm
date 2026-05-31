@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LeftArrow, RightArrow } from "../assets/home/homeIndex";
+import BackButton from "../components/ui/BackButton";
 
 interface Props {
   onDateClick?: (date: string) => void;
@@ -29,6 +30,7 @@ export default function MyCalendarPage({ onDateClick }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
+      <BackButton />
       {/* 1. 헤더  */}
       <div className="flex w-200 h-17 items-center justify-between rounded-[12px] px-6 mb-3 bg-(--gray-0) shadow-sm">
         <button
