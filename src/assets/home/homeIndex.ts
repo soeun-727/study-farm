@@ -1,2 +1,4 @@
-export { default as leftArrow } from "./leftArrow.svg";
-export { default as rightArrow } from "./rightArrow.svg";
+import LeftArrow from "./leftArrow.svg?react";
+import RightArrow from "./rightArrow.svg?react";
+
+export { LeftArrow, RightArrow };
