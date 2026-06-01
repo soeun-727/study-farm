@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 
-import { leftArrow, rightArrow } from "../assets/home/homeIndex";
+import { LeftArrow, RightArrow } from "../assets/home/homeIndex";
 import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
 import TimerFooter from "../components/home/TimerFooter";
 
 export default function HomePage() {
-  const navigate = useNavigate();
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   const [timerState, setTimerState] = useState<
     "START" | "RUNNING" | "PAUSED" | "STOP"
@@ -49,7 +47,7 @@ export default function HomePage() {
       >
         <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
           <img
-            src={leftArrow}
+            src={LeftArrow as unknown as string}
             className="w-full animate-bounce-left"
             alt="이전"
           />
@@ -64,7 +62,7 @@ export default function HomePage() {
       >
         <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
           <img
-            src={rightArrow}
+            src={RightArrow as unknown as string}
             className="w-full animate-bounce-right"
             alt="다음"
           />
