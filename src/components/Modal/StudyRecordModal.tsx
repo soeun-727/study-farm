@@ -36,10 +36,10 @@ const StudyRecordModal = ({
           >
             <img src={BackButtonIcon} alt="뒤로가기" className="w-9 h-9" />
           </button>
-
-          {/* 타이틀: 24px 글씨 typo-h1, 주 텍스트 컬러 --gray-900 */}
           <h2 className="typo-h1 text-(--gray-900)">
-            {month}월 {day}일 {time} 학습 기록
+            <span className="text-(--primary-orange)">{month}</span>월{" "}
+            <span className="text-(--primary-orange)">{day}</span>일{" "}
+            <span className="text-(--primary-orange)">{time}</span> 학습 기록
           </h2>
 
           <button
@@ -58,7 +58,7 @@ const StudyRecordModal = ({
             <span className="typo-h2 text-(--gray-900)">학습 시간</span>
 
             {/* 콘텐츠 박스: 요청하신 --primary-light-brown 배경색 및 typo-body 매핑 */}
-            <div className="rounded-xl bg-(--primary-light-brown) px-5 py-3 typo-body text-(--gray-900)">
+            <div className="flex items-center h-10 rounded-[10px] bg-(--primary-light-brown) px-5 py-3 typo-body text-(--gray-900)">
               {studyTime}
             </div>
           </div>
@@ -67,7 +67,7 @@ const StudyRecordModal = ({
           <div className="mb-8 grid grid-cols-[100px_1fr] items-center gap-4">
             <span className="typo-h2 text-(--gray-900)">학습 내용</span>
 
-            <div className="rounded-xl bg-(--primary-light-brown) px-5 py-3 typo-body text-(--gray-900)">
+            <div className="flex items-center h-10 rounded-[10px] bg-(--primary-light-brown) px-5 py-3 typo-body text-(--gray-900)">
               {studyContent}
             </div>
           </div>
@@ -77,7 +77,7 @@ const StudyRecordModal = ({
             {/* 상단 정렬 시 박스 패딩과 라인을 맞추기 위해 pt-3 pl값 임의로 설정? 유지 */}
             <span className="pt-3 pl-10 typo-h2 text-(--gray-900) ">메모</span>
 
-            <div className="min-h-[180px] rounded-xl bg-(--primary-light-brown) p-5">
+            <div className="flex items-center h-[180px] rounded-[10px] bg-(--primary-light-brown) px-5 py-3">
               <textarea
                 value={memo}
                 readOnly
