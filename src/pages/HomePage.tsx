@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { leftArrow, rightArrow } from "../assets/home/homeIndex";
 import TimerStart from "../components/home/TimerStart";
 import TimerRunning from "../components/home/TimerRunning";
 import TimerStop from "../components/home/TimerStop";
+import TimerFooter from "../components/home/TimerFooter";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -12,6 +13,33 @@ export default function HomePage() {
   const [timerState, setTimerState] = useState<"START" | "RUNNING" | "STOP">(
     "START",
   );
+
+  const [seconds, setSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 타이머 실행 및 정지 제어
+  useEffect(() => {
+    if (timerState === "RUNNING") {
+      timerRef.current = setInterval(() => {
+        setSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if (timerState === "STOP") {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timerState]);
+
+  const handleReset = () => {
+    setSeconds(0);
+    setTimerState("START");
+  };
+
   return (
     <div className="h-screen box-border border-t-10 border-b-10 border-(--primary-brown) overflow-hidden relative">
       {/* 왼쪽 감지 영역 */}
@@ -56,16 +84,19 @@ export default function HomePage() {
           `}
         />
 
-        {/* 중앙 */}
+        {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-2 z-10 mt-5">
-          {timerState === "START" && (
-            <TimerStart onStart={() => setTimerState("RUNNING")} />
-          )}
-          {timerState === "RUNNING" && (
-            <TimerRunning onStop={() => setTimerState("STOP")} />
-          )}
-
+          {timerState === "START" && <TimerStart />}
+          {/* TimerRunning에 측정 중인 초(seconds) 전달 */}
+          {timerState === "RUNNING" && <TimerRunning seconds={seconds} />}
           {timerState === "STOP" && <TimerStop />}
+
+          <TimerFooter
+            timerState={timerState}
+            onStart={() => setTimerState("RUNNING")}
+            onStop={() => setTimerState("STOP")}
+            onReset={handleReset}
+          />
         </div>
 
         {/* 오른쪽 배경 */}

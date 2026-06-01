@@ -1,0 +1,13 @@
+export { default as appleBackground } from "./appleBackground.svg";
+export { default as bananaBackground } from "./bananaBackground.svg";
+export { default as blueberryBackground } from "./blueberryBackground.svg";
+export { default as cornBackground } from "./cornBackground.svg";
+export { default as mangoBackground } from "./mangoBackground.svg";
+export { default as passionFruitBackground } from "./passionFruitBackground.svg";
+export { default as potatoBackground } from "./potatoBackground.svg";
+export { default as riceBackground } from "./riceBackground.svg";
+export { default as startFruitBackground } from "./startFruitBackground.svg";
+export { default as strawberryBackground } from "./strawberryBackground.svg";
+export { default as sweetPotatoBackground } from "./sweetPotatoBackground.svg";
+export { default as watermelonBackground } from "./watermelonBackground.svg";
+export { default as wheatBackground } from "./wheatBackground.svg";

@@ -1,15 +1,6 @@
-import { useState } from "react";
-
 import { firstFarmerTop } from "../../assets";
-import { startButton, startKorean } from "../../assets/home/homeIndex";
 
-interface TimerStartProps {
-  onStart: () => void;
-}
-
-export default function TimerStart({ onStart }: TimerStartProps) {
-  const [hoverButton, setHoverButton] = useState(false);
-
+export default function TimerStart() {
   return (
     <>
       <img src={firstFarmerTop} className="w-50" />
@@ -19,14 +10,6 @@ export default function TimerStart({ onStart }: TimerStartProps) {
       >
         공부를 시작해볼까요?
       </div>
-      <button
-        onMouseEnter={() => setHoverButton(true)}
-        onMouseLeave={() => setHoverButton(false)}
-        onClick={onStart}
-        className="active:scale-95 transition-transform shrink-0"
-      >
-        <img src={hoverButton ? startKorean : startButton} className="mt-10" />
-      </button>
     </>
   );
 }
