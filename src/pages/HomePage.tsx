@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { firstFarmer } from "../assets";
 import { leftArrow, rightArrow } from "../assets/home/homeIndex";
+import TimerStart from "../components/home/TimerStart";
+import TimerRunning from "../components/home/TimerRunning";
+import TimerStop from "../components/home/TimerStop";
 
-export default function Home() {
+export default function HomePage() {
   const navigate = useNavigate();
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
-
+  const [timerState, setTimerState] = useState<"START" | "RUNNING" | "STOP">(
+    "START",
+  );
   return (
-    <div className="bg-[#DFCBAA] h-screen overflow-hidden relative">
+    <div className="h-screen box-border border-t-10 border-b-10 border-(--primary-brown) overflow-hidden relative">
       {/* 왼쪽 감지 영역 */}
       <div
-        className="fixed left-0 top-0 w-[25vw] h-full z-40"
+        className="fixed left-0 top-0 w-60 h-full z-40"
         onMouseEnter={() => setHoverSide("left")}
         onMouseLeave={() => setHoverSide(null)}
       >
@@ -27,7 +31,7 @@ export default function Home() {
 
       {/* 오른쪽 감지 + 페이지 이동 */}
       <div
-        className="fixed right-0 top-0 w-[25vw] h-full z-40"
+        className="fixed right-0 top-0 w-60 h-full z-40"
         onMouseEnter={() => setHoverSide("right")}
         onMouseLeave={() => setHoverSide(null)}
       >
@@ -47,25 +51,28 @@ export default function Home() {
         {/* 왼쪽 배경 */}
         <div
           className={`
-            w-75 h-full transition-colors duration-300
-            ${hoverSide === "left" ? "bg-[#FAFAFA]" : "bg-[#DFCBAA]"}
+            w-60 h-full transition-colors duration-300
+            ${hoverSide === "left" ? "bg-(--gray-0)" : ""}
           `}
         />
 
         {/* 중앙 */}
-        <div className="w-405 flex flex-col items-center gap-5 px-10 z-10">
-          <div className="flex items-center justify-center rounded-full w-60 h-60 bg-white overflow-hidden">
-            <img src={firstFarmer} className="h-full mt-4" />
-          </div>
+        <div className="flex-1 flex flex-col items-center px-2 z-10 mt-5">
+          {timerState === "START" && (
+            <TimerStart onStart={() => setTimerState("RUNNING")} />
+          )}
+          {timerState === "RUNNING" && (
+            <TimerRunning onStop={() => setTimerState("STOP")} />
+          )}
 
-          <div className="typo-h2">공부 시작하기</div>
+          {timerState === "STOP" && <TimerStop />}
         </div>
 
         {/* 오른쪽 배경 */}
         <div
           className={`
-            w-75 h-full transition-colors duration-300
-            ${hoverSide === "right" ? "bg-[#FAFAFA]" : "bg-[#DFCBAA]"}
+            w-60 h-full transition-colors duration-300
+            ${hoverSide === "right" ? "bg-(--gray-0)" : ""}
           `}
         />
       </main>
