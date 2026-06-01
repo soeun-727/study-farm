@@ -2,17 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { leftArrow, rightArrow } from "../assets/home/homeIndex";
-import TimerStart from "../components/home/TimerStart";
+import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
-import TimerStop from "../components/home/TimerStop";
 import TimerFooter from "../components/home/TimerFooter";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
-  const [timerState, setTimerState] = useState<"START" | "RUNNING" | "STOP">(
-    "START",
-  );
+  const [timerState, setTimerState] = useState<
+    "START" | "RUNNING" | "PAUSED" | "STOP"
+  >("START");
 
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -23,7 +22,7 @@ export default function HomePage() {
       timerRef.current = setInterval(() => {
         setSeconds((prev) => prev + 1);
       }, 1000);
-    } else if (timerState === "STOP") {
+    } else if (timerState === "STOP" || timerState === "PAUSED") {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -63,10 +62,7 @@ export default function HomePage() {
         onMouseEnter={() => setHoverSide("right")}
         onMouseLeave={() => setHoverSide(null)}
       >
-        <button
-          onClick={() => navigate("/mypage")}
-          className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95"
-        >
+        <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
           <img
             src={rightArrow}
             className="w-full animate-bounce-right"
@@ -85,15 +81,25 @@ export default function HomePage() {
         />
 
         {/* 중앙 콘텐츠 영역 */}
-        <div className="flex-1 flex flex-col items-center px-2 z-10 mt-5">
-          {timerState === "START" && <TimerStart />}
-          {/* TimerRunning에 측정 중인 초(seconds) 전달 */}
-          {timerState === "RUNNING" && <TimerRunning seconds={seconds} />}
-          {timerState === "STOP" && <TimerStop />}
+        <div className="flex-1 flex flex-col items-center px-2 z-10">
+          {(timerState === "START" ||
+            timerState === "PAUSED" ||
+            timerState === "STOP") && (
+            <TimerDefault timerState={timerState} seconds={seconds} />
+          )}
+
+          {timerState === "RUNNING" && (
+            <TimerRunning
+              seconds={seconds}
+              currentPlant="rice"
+              totalProgress={20}
+            />
+          )}
 
           <TimerFooter
             timerState={timerState}
             onStart={() => setTimerState("RUNNING")}
+            onPause={() => setTimerState("PAUSED")}
             onStop={() => setTimerState("STOP")}
             onReset={handleReset}
           />

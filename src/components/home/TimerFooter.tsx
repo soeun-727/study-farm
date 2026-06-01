@@ -6,11 +6,14 @@ import {
   pauseKorean,
   stopButton,
   stopKorean,
+  recordKorean,
+  recordButton,
 } from "../../assets/home/homeIndex";
 
 interface TimerFooterProps {
-  timerState: "START" | "RUNNING" | "STOP";
+  timerState: "START" | "RUNNING" | "PAUSED" | "STOP";
   onStart: () => void;
+  onPause: () => void;
   onStop: () => void;
   onReset?: () => void;
 }
@@ -18,6 +21,7 @@ interface TimerFooterProps {
 export default function TimerFooter({
   timerState,
   onStart,
+  onPause,
   onStop,
   onReset,
 }: TimerFooterProps) {
@@ -26,7 +30,6 @@ export default function TimerFooter({
 
   return (
     <div className="mt-10">
-      {/* --- 1) 대기 상태 (START) --- */}
       {timerState === "START" && (
         <button
           onMouseEnter={() => setIsStartHovered(true)}
@@ -41,12 +44,12 @@ export default function TimerFooter({
         </button>
       )}
 
-      {/* --- 2) 실행 상태 (RUNNING) --- */}
       {timerState === "RUNNING" && (
         <div className="flex gap-5">
           <button
             onMouseEnter={() => setHoveredType("pause")}
             onMouseLeave={() => setHoveredType(null)}
+            onClick={onPause}
             className="active:scale-95 transition-transform shrink-0"
           >
             <img
@@ -68,13 +71,45 @@ export default function TimerFooter({
         </div>
       )}
 
-      {/* --- 3) 정지 상태 (STOP) --- */}
+      {timerState === "PAUSED" && (
+        <div className="flex gap-5">
+          <button
+            onMouseEnter={() => setIsStartHovered(true)}
+            onMouseLeave={() => setIsStartHovered(false)}
+            onClick={onStart}
+            className="active:scale-95 transition-transform shrink-0"
+          >
+            <img
+              src={isStartHovered ? startKorean : startButton}
+              alt="시작 버튼"
+            />
+          </button>
+          <button
+            onMouseEnter={() => setHoveredType("stop")}
+            onMouseLeave={() => setHoveredType(null)}
+            onClick={onStop}
+            className="active:scale-95 transition-transform shrink-0"
+          >
+            <img
+              src={hoveredType === "stop" ? stopKorean : stopButton}
+              alt="정지 버튼"
+            />
+          </button>
+        </div>
+      )}
+
+      {/* 현재는 리셋되도록 작성 */}
       {timerState === "STOP" && (
         <button
+          onMouseEnter={() => setIsStartHovered(true)}
+          onMouseLeave={() => setIsStartHovered(false)}
           onClick={onReset}
-          className="px-4 py-2 bg-zinc-200 text-neutral-800 rounded-lg mt-10 font-bold active:scale-95 transition-transform"
+          className="active:scale-95 transition-transform shrink-0"
         >
-          처음으로 돌아가기
+          <img
+            src={isStartHovered ? recordKorean : recordButton}
+            alt="시작 버튼"
+          />
         </button>
       )}
     </div>
