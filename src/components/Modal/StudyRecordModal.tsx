@@ -37,9 +37,9 @@ const StudyRecordModal = ({
             <img src={BackButtonIcon} alt="뒤로가기" className="w-9 h-9" />
           </button>
           <h2 className="typo-h1 text-(--gray-900)">
-            <span className="text-(--primary-orange)">{month}</span>월{" "}
-            <span className="text-(--primary-orange)">{day}</span>일{" "}
-            <span className="text-(--primary-orange)">{time}</span> 학습 기록
+            <span className="text-(--primary-brown)">{month}</span>월{" "}
+            <span className="text-(--primary-brown)">{day}</span>일{" "}
+            <span className="text-(--primary-brown)">{time}</span> 학습 기록
           </h2>
 
           <button
