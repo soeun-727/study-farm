@@ -46,11 +46,7 @@ export default function HomePage() {
         onMouseLeave={() => setHoverSide(null)}
       >
         <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
-          <img
-            src={LeftArrow as unknown as string}
-            className="w-full animate-bounce-left"
-            alt="이전"
-          />
+          <LeftArrow className="w-full h-auto animate-bounce-left" />
         </button>
       </div>
 
@@ -61,11 +57,7 @@ export default function HomePage() {
         onMouseLeave={() => setHoverSide(null)}
       >
         <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
-          <img
-            src={RightArrow as unknown as string}
-            className="w-full animate-bounce-right"
-            alt="다음"
-          />
+          <RightArrow className="w-full h-auto animate-bounce-right" />
         </button>
       </div>
 
