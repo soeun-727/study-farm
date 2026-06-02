@@ -114,7 +114,7 @@ export default function RankingItem({
 
             {/* 닉네임 */}
             <div className="flex items-center">
-            <span className="typo-h2 text-(--primary-brown) mr-1 ">
+            <span className="typo-h2 text-(--primary-brown) mr-1">
               {nickname}
             </span>
             <span className="typo-h2 text-(--gray-900) ">
