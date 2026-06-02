@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from "react-router-dom";
 
 
 interface RankingItemProps {
@@ -23,9 +23,7 @@ export default function RankingItem({
   const getRankBorderStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return "border-transparent bg-gradient-to-br from-(--primary-orange) to-(--primary-yellow) bg-clip-border";
       case 2:
-        return "border-transparent bg-gradient-to-br from-(--primary-orange) to-(--primary-yellow) bg-clip-border";
       case 3:
         return "border-transparent bg-gradient-to-br from-(--primary-orange) to-(--primary-yellow) bg-clip-border";
       default:
@@ -64,15 +62,16 @@ export default function RankingItem({
           justify-center
           rounded-lg
           border-[5px]
-          bg-clip-padding 
           ${getRankBorderStyle(rank)}
         `}
       >
+        <div className="flex h-full w-full items-center justify-center rounded bg-(--gray-0)">
         <img
           src={avatarUrl}
           alt={nickname}
           className="h-full w-full object-contain p-2 "
         />
+      </div>
       </div>
 
       {/*정보 카드*/}
@@ -123,7 +122,7 @@ export default function RankingItem({
             </div>
           </div>
 
-          <div className="h-[70px] border-r-[2px] border-(--gray-500)"></div>
+          <div className="h-[70px] border-r-[5px] border-(--gray-400)"></div>
 
           {/* 공부 시간 정보 */}
           <div className="typo-h2 text-(--gray-800)">
@@ -162,7 +161,8 @@ export default function RankingItem({
           </span>
 
           {/* 전체보기 버튼 */}
-          <button
+          <Link
+            to="../pages/RankDetail" // 실제 경로로 수정 필요
             className="
               typo-caption
               text-(--primary-brown)
@@ -171,7 +171,7 @@ export default function RankingItem({
             "
           >
             전체 보기 &gt;
-          </button>
+          </Link>
 
           </div>
 
@@ -195,7 +195,7 @@ export default function RankingItem({
       </div>
       
  </div>
- <div className="h-[5px] w-full bg-(--gray-500) rounded-full mb-9" >
+ <div className="h-[5px] w-full bg-(--gray-400) rounded-full mb-9" >
 </div>
     </>
   );
