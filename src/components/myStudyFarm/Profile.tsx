@@ -3,6 +3,8 @@ import { riceBackground } from "../../assets/cropBackground/cropBackgroundIndex"
 import MyCrops from "./myCrops";
 import MyStats from "./myStats";
 
+import { mockMidFarmer } from "../../constants/userStatData";
+
 export default function Profile() {
   return (
     <div className="flex w-230 h-85 px-5 justify-between">
@@ -14,7 +16,7 @@ export default function Profile() {
       {/* 정보 영역 */}
       <div className="flex flex-col justify-between pb-1">
         <MyCrops />
-        <MyStats />
+        <MyStats {...mockMidFarmer} />
       </div>
     </div>
   );
