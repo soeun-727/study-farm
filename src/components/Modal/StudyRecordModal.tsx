@@ -2,7 +2,7 @@ import { useState } from "react";
 import BackButtonIcon from "../../assets/Modal/BackButton.svg";
 import dots from "../../assets/Modal/threedots.svg";
 import Button from "../ui/Button";
-import DoublecheckModal from "../ui/DoublecheckModal";
+import DoublecheckModal from "../modals/DoublecheckModal";
 
 interface ModalProps {
   month: number;
