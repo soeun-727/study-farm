@@ -1,5 +1,41 @@
+import { useEffect, useState } from "react";
+
 export default function myWeeklyStudies() {
   const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+  const [currentMonth, setCurrentMonth] = useState<number>(0);
+  const [currentWeek, setCurrentWeek] = useState<number>(0);
+
+  useEffect(() => {
+    const getMonthAndWeek = (date: Date) => {
+      const currentDate = new Date(date.getTime());
+      const dayNum = (date.getDay() + 6) % 7;
+      currentDate.setDate(currentDate.getDate() - dayNum + 3);
+      const month = currentDate.getMonth() + 1;
+      const firstDayOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1,
+      );
+      const firstDayOfWeek = firstDayOfMonth.getDay();
+      const firstThursday =
+        firstDayOfWeek <= 4 ? 5 - firstDayOfWeek : 12 - firstDayOfWeek;
+      const firstThursdayDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        firstThursday,
+      );
+      const week =
+        Math.floor(
+          (currentDate.getTime() - firstThursdayDate.getTime()) /
+            (7 * 24 * 60 * 60 * 1000),
+        ) + 1;
+      return { month, week };
+    };
+    const { month, week } = getMonthAndWeek(new Date());
+    setCurrentMonth(month);
+    setCurrentWeek(week);
+  }, []);
+
   return (
     <div className="flex flex-col w-230 h-70 bg-(--primary-brown)/50 rounded-[15px] p-4 gap-4">
       {/* 헤더 영역 */}
@@ -8,7 +44,7 @@ export default function myWeeklyStudies() {
           전체 학습 내역 &gt;
         </button>
         <p className="typo-body !font-semibold text-center">
-          {}월 {}주차 학습 내역
+          {currentMonth}월 {currentWeek}주차 학습 내역
         </p>
       </div>
       {/* 요일 영역 */}
