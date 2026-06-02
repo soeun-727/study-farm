@@ -18,9 +18,8 @@ export default function myWeeklyStudies() {
             key={index}
             className="flex flex-col items-start justify-start py-4 px-2 w-28 h-full bg-(--gray-0) rounded-[25px] shadow-sm"
           >
-            {/* 요일 텍스트 표시 (일요일은 레드, 토요일은 블루 등 커스텀 가능) */}
             <span
-              className={`typo-body2 !font-bold ${
+              className={`typo-body2 !font-bold px-1 ${
                 day === "일" || day === "토" ? "text-(--primary-brown)" : ""
               }`}
             >
