@@ -72,7 +72,10 @@ const StudyRecordModal = ({
         {/* Header 영역 */}
         <div className="flex items-center justify-between relative pb-10">
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+            }}
             className="cursor-pointer text-2xl text-(--gray-700)"
           >
             <img src={BackButtonIcon} alt="뒤로가기" className="w-9 h-9" />

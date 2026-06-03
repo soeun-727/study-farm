@@ -3,6 +3,9 @@ import { LeftArrow } from "../assets/home/homeIndex";
 import MyWeeklyStudies from "../components/myStudyFarm/myWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
 
+import { mockMidFarmer } from "../constants/userStatData";
+import { mockWeeklyRecords } from "../constants/userStudyData";
+
 export default function MyStudyFarmPage() {
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
 
@@ -29,8 +32,8 @@ export default function MyStudyFarmPage() {
 
         {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-5 gap-6 z-10">
-          <Profile />
-          <MyWeeklyStudies />
+          <Profile userStats={mockMidFarmer} />
+          <MyWeeklyStudies weeklyRecords={mockWeeklyRecords} />
         </div>
         {/* 오른쪽 배경 */}
         <div className="w-60 h-full" />

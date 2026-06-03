@@ -1,17 +1,26 @@
 import MyCrops from "./myCrops";
 import MyStats from "./myStats";
 
-import { mockMidFarmer } from "../../constants/userStatData";
 import {
   CROP_BACKGROUNDS,
   FARMER_COMPONENTS,
 } from "../../constants/profileImageAssets";
 import { CROP_ICONS } from "../../constants/collectedCropAssets";
 
-export default function Profile() {
-  const { currentCrop, currentLevel, collectedCrops = [] } = mockMidFarmer;
+export interface ProfileProps {
+  userStats: {
+    nickname: string;
+    currentCrop: string;
+    days: number;
+    currentLevel: number;
+    cropCount: number;
+    cropProgress: number;
+    collectedCrops?: string[];
+  };
+}
 
-  // 1. 배경 및 농부 에셋 매핑
+export default function Profile({ userStats }: ProfileProps) {
+  const { currentCrop, currentLevel, collectedCrops = [] } = userStats;
   const selectedBackground =
     CROP_BACKGROUNDS[currentCrop] || CROP_BACKGROUNDS["쌀"];
   const FarmerComponent =
@@ -39,7 +48,7 @@ export default function Profile() {
       {/* 정보 영역 */}
       <div className="flex flex-col justify-between pb-1">
         <MyCrops collectedCrops={mappedCropUrls} />
-        <MyStats {...mockMidFarmer} />
+        <MyStats {...userStats} />
       </div>
     </div>
   );
