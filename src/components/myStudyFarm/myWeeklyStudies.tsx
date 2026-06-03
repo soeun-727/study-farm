@@ -132,7 +132,7 @@ export default function MyWeeklyStudies({
           onDelete={() => {
             setIsModalOpen(false);
           }}
-          onSave={(updatedContent, updatedMemo) => {
+          onSave={(_updatedContent, _updatedMemo) => {
             setIsModalOpen(false);
           }}
         />
