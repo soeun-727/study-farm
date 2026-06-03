@@ -68,6 +68,7 @@ export default function MyWeeklyStudies({
     <div className="flex flex-col w-230 h-70 bg-(--primary-brown)/50 rounded-[15px] p-4 gap-4">
       {/* 헤더 영역 */}
       <div className="relative flex items-end justify-center w-full">
+        {/* 추후 캘린더 연결 */}
         <button className="absolute left-0 typo-caption text-(--gray-0) cursor-pointer">
           전체 학습 내역 &gt;
         </button>
