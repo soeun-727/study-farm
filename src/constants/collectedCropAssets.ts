@@ -1,0 +1,31 @@
+import {
+  potato,
+  rice,
+  sweetPotato,
+  wheat,
+  corn,
+  apple,
+  strawberry,
+  blueberry,
+  watermelon,
+  banana,
+  mango,
+  passionFruit,
+  starFruit,
+} from "../assets/crops/cropsIndex";
+
+export const CROP_ICONS: Record<string, string> = {
+  rice: rice,
+  wheat: wheat,
+  sweetPotato: sweetPotato,
+  potato: potato,
+  corn: corn,
+  apple: apple,
+  strawberry: strawberry,
+  blueberry: blueberry,
+  watermelon: watermelon,
+  banana: banana,
+  mango: mango,
+  passionFruit: passionFruit,
+  starFruit: starFruit,
+};

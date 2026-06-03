@@ -5,6 +5,7 @@ export interface UserStatsProps {
   currentLevel: number;
   cropCount: number;
   cropProgress: number;
+  collectedCrops?: string[];
 }
 
 // 1. 신입 농부 (1레벨, 작물: 고구마, 1레벨 최대 cropCount는 2)
@@ -15,6 +16,7 @@ export const mockNewFarmer: UserStatsProps = {
   currentLevel: 1,
   cropCount: 1, // 최대 2 중 1개 수확
   cropProgress: 35,
+  collectedCrops: ["rice", "wheat"],
 };
 
 // 2. 성실한 농부 (2레벨, 작물: 쌀, 2레벨 최대 cropCount는 3)
@@ -25,6 +27,20 @@ export const mockMidFarmer: UserStatsProps = {
   currentLevel: 2,
   cropCount: 2, // 최대 3 중 2개 수확
   cropProgress: 70,
+  collectedCrops: [
+    "rice",
+    "wheat",
+    "sweetPotato",
+    "potato",
+    "corn",
+    "apple",
+    "strawberry",
+    "blueberry",
+    "watermelon",
+    "banana",
+    "mango",
+    "passionFruit",
+  ],
 };
 
 // 3. 고수 농부 (3레벨, 작물: 블루베리, 3레벨 이상 최대 cropCount는 4)
