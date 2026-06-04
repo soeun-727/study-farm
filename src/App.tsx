@@ -1,3 +1,14 @@
-export default function App() {
-  return <></>;
+
+import RankPage from "./pages/RankPage";
+
+
+function App() {
+  return (
+   <>
+   <RankPage />
+   </>
+  );
 }
+
+
+export default App;

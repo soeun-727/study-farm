@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import BackButtonIcon from "../assets/Modal/BackButton.svg";
+import BackButtonIcon from "../components/ui/BackButton";
 
 
 // 임시 더미 데이터)
@@ -40,7 +40,7 @@ export default function RankingDetailPage() {
       <button
       onClick={handleGoBack}
       className="absolute top-10 left-10 cursor-pointer transition hover:opacity-70">
-      <img src={BackButtonIcon} alt="뒤로가기" className="w-9 h-9" />
+      <BackButtonIcon />
     </button>
 
 

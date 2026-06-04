@@ -1,5 +1,5 @@
 import { useState } from "react";
-import RankingItem from "../components/Rank/RankingItem"; 
+import RankingItem from "../components/rank/RankingItem"; 
 import { RightArrow } from "../assets/home/homeIndex";
 import { useNavigate } from "react-router-dom";
 
