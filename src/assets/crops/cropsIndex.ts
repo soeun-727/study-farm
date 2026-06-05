@@ -1,0 +1,13 @@
+export { default as apple } from "./apple.svg";
+export { default as banana } from "./banana.svg";
+export { default as blueberry } from "./blueberry.svg";
+export { default as corn } from "./corn.svg";
+export { default as mango } from "./mango.svg";
+export { default as passionFruit } from "./passionFruit.svg";
+export { default as potato } from "./potato.svg";
+export { default as rice } from "./rice.svg";
+export { default as starFruit } from "./starFruit.svg";
+export { default as strawberry } from "./strawberry.svg";
+export { default as sweetPotato } from "./sweetPotato.svg";
+export { default as watermelon } from "./watermelon.svg";
+export { default as wheat } from "./wheat.svg";
