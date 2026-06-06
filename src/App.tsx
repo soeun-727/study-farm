@@ -1,14 +1,4 @@
 
-import RankPage from "./pages/RankPage";
-
-
-function App() {
-  return (
-   <>
-   <RankPage />
-   </>
-  );
+export default function App() {
+  return <></>;
 }
-
-
-export default App;
