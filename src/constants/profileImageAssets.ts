@@ -16,19 +16,19 @@ import {
 } from "../assets/cropBackground/cropBackgroundIndex";
 
 export const CROP_BACKGROUNDS: Record<string, string> = {
-  쌀: riceBackground,
-  밀: wheatBackground,
-  고구마: sweetPotatoBackground,
-  감자: potatoBackground,
-  옥수수: cornBackground,
-  사과: appleBackground,
-  딸기: strawberryBackground,
-  블루베리: blueberryBackground,
-  수박: watermelonBackground,
-  바나나: bananaBackground,
-  망고: mangoBackground,
-  패션후르트: passionFruitBackground,
-  스타푸르트: starFruitBackground,
+  rice: riceBackground, // 쌀
+  wheat: wheatBackground, // 밀
+  sweet_potato: sweetPotatoBackground, // 고구마 (또는 본인이 정한 영문 ID)
+  potato: potatoBackground, // 감자
+  corn: cornBackground, // 옥수수
+  apple: appleBackground, // 사과
+  strawberry: strawberryBackground, // 딸기
+  blueberry: blueberryBackground, // 블루베리
+  watermelon: watermelonBackground, // 수박
+  banana: bananaBackground, // 바나나
+  mango: mangoBackground, // 망고
+  passion_fruit: passionFruitBackground, // 패션후르트
+  star_fruit: starFruitBackground, // 스타푸르트
 };
 
 export const FARMER_COMPONENTS: Record<number, string> = {
