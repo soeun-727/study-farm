@@ -92,7 +92,7 @@ export default function MyWeeklyStudies({
     });
 
     Object.keys(grouped).forEach((day) => {
-      grouped[day].sort((a, b) => a.startTime.localeCompare(b.startTime));
+      grouped[day].sort((a, b) => a.startTime.localeCompare(a.startTime));
     });
 
     return grouped;
@@ -151,7 +151,7 @@ export default function MyWeeklyStudies({
                   >
                     <div className="flex gap-1 items-start bg-(--primary-yellow) h-full w-full px-1 typo-body2 flex-1 min-h-0">
                       <span className="font-semibold shrink-0">
-                        {record.startTime.split(":")[0]}시
+                        {Number(record.startTime.split(":")[0])}시{" "}
                       </span>
                       {record.title && record.title.trim() !== "" && (
                         <span className="font-normal truncate">

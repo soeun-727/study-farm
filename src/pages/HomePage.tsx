@@ -79,7 +79,6 @@ export default function HomePage() {
   };
 
   const handleStop = async () => {
-    setTimerState("PAUSED");
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -87,11 +86,15 @@ export default function HomePage() {
 
     const durationMinutes = Math.floor(seconds / 60);
     if (durationMinutes < 1) {
+      setTimerState("PAUSED");
       alert(
         "1분 미만으로 공부한 시간은 농장에 반영되지 않습니다. 이어서 조금만 더 힘내볼까요? 👨‍🌾",
       );
       return;
     }
+
+    setTimerState("STOP");
+
     try {
       await firebaseService.saveStudyLog({
         startTime: startTimeRef.current,
@@ -103,6 +106,7 @@ export default function HomePage() {
       await fetchTimerData();
     } catch (error) {
       alert("데이터 저장에 실패했습니다. 네트워크를 확인하세요.");
+      setTimerState("PAUSED");
     }
   };
 
