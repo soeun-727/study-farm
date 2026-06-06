@@ -5,6 +5,10 @@ import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
 import TimerFooter from "../components/home/TimerFooter";
 
+import { firebaseService } from "../api/firebaseService";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../api/firebase"; // 실제 프로젝트의 firebase설정 주소 확인
+
 export default function HomePage() {
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   const [timerState, setTimerState] = useState<
@@ -13,8 +17,36 @@ export default function HomePage() {
 
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<string>("");
 
-  // 타이머 실행 및 정지 제어
+  const [currentPlant, setCurrentPlant] = useState<string>("rice");
+  const [userProgress, setUserProgress] = useState<number>(0);
+  const [studyTime, setStudyTime] = useState<number>(60);
+
+  const fetchTimerData = async () => {
+    try {
+      const userData = await firebaseService.getCurrentUser();
+
+      if (userData) {
+        const plantId = userData.currentCrop || "rice";
+        setCurrentPlant(plantId);
+        setUserProgress(userData.cropProgress || 0);
+
+        const cropRef = doc(db, "Crop Data", plantId);
+        const cropSnap = await getDoc(cropRef);
+        if (cropSnap.exists()) {
+          setStudyTime(cropSnap.data().studyTime || 60);
+        }
+      }
+    } catch (error) {
+      console.error("타이머 데이터 로드 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTimerData();
+  }, []);
+
   useEffect(() => {
     if (timerState === "RUNNING") {
       timerRef.current = setInterval(() => {
@@ -32,9 +64,48 @@ export default function HomePage() {
     };
   }, [timerState]);
 
-  const handleReset = () => {
-    setSeconds(0);
-    setTimerState("START");
+  const handleStart = () => {
+    if (timerState === "START") {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      startTimeRef.current = `${hours}:${minutes}`;
+    }
+    setTimerState("RUNNING");
+  };
+
+  const handlePause = () => {
+    setTimerState("PAUSED");
+  };
+
+  const handleStop = async () => {
+    setTimerState("STOP");
+    const durationMinutes = Math.floor(seconds / 60);
+
+    if (durationMinutes < 1) {
+      alert("1분 미만으로 공부한 시간은 농장에 반영되지 않습니다.");
+      return;
+    }
+
+    const studyTitle = prompt("오늘 어떤 공부를 하셨나요?") || "자율 학습";
+    const studyMemo = prompt("간단한 메모를 남겨주세요.") || "";
+
+    try {
+      await firebaseService.saveStudyLog({
+        startTime: startTimeRef.current,
+        title: studyTitle,
+        duration: durationMinutes,
+        memo: studyMemo,
+      });
+
+      alert(
+        `성공적으로 저장되었습니다! 작물이 ${durationMinutes}분만큼 자라났습니다. ✨`,
+      );
+
+      await fetchTimerData();
+    } catch (error) {
+      alert("데이터 저장에 실패했습니다. 네트워크를 확인하세요.");
+    }
   };
 
   return (
@@ -81,17 +152,17 @@ export default function HomePage() {
           {timerState === "RUNNING" && (
             <TimerRunning
               seconds={seconds}
-              currentPlant="rice"
-              totalProgress={20}
+              currentPlant={currentPlant}
+              totalProgress={userProgress}
+              studyTime={studyTime}
             />
           )}
 
           <TimerFooter
             timerState={timerState}
-            onStart={() => setTimerState("RUNNING")}
-            onPause={() => setTimerState("PAUSED")}
-            onStop={() => setTimerState("STOP")}
-            onReset={handleReset}
+            onStart={handleStart}
+            onPause={handlePause}
+            onStop={handleStop}
           />
         </div>
 

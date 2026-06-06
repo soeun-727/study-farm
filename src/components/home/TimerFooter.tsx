@@ -15,7 +15,6 @@ interface TimerFooterProps {
   onStart: () => void;
   onPause: () => void;
   onStop: () => void;
-  onReset?: () => void;
 }
 
 export default function TimerFooter({
@@ -23,7 +22,6 @@ export default function TimerFooter({
   onStart,
   onPause,
   onStop,
-  onReset,
 }: TimerFooterProps) {
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [hoveredType, setHoveredType] = useState<"pause" | "stop" | null>(null);
@@ -103,7 +101,6 @@ export default function TimerFooter({
         <button
           onMouseEnter={() => setIsStartHovered(true)}
           onMouseLeave={() => setIsStartHovered(false)}
-          onClick={onReset}
           className="active:scale-95 transition-transform shrink-0"
         >
           <img
