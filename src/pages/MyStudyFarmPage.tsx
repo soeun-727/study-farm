@@ -36,14 +36,14 @@ export default function MyStudyFarmPage() {
   }, []);
   if (loading) {
     return (
-      <div className="h-screen flex justify-center items-center bg-(--gray-0) text-(--primary-brown) font-bold text-xl">
+      <div className="h-screen flex justify-center items-center text-(--primary-brown) typo-h1">
         농장 데이터를 불러오는 중입니다...
       </div>
     );
   }
   if (!userStats) {
     return (
-      <div className="h-screen flex justify-center items-center bg-(--gray-0) text-red-500 font-bold">
+      <div className="h-screen flex justify-center items-center text-red-500 typo-h1">
         유저 정보를 찾을 수 없습니다.
       </div>
     );
