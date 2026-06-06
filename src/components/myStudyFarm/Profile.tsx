@@ -1,5 +1,5 @@
-import MyCrops from "./myCrops";
-import MyStats from "./myStats";
+import MyCrops from "./MyCrops";
+import MyStats from "./MyStats";
 
 import {
   CROP_BACKGROUNDS,

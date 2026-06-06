@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LeftArrow } from "../assets/home/homeIndex";
-import MyWeeklyStudies from "../components/myStudyFarm/myWeeklyStudies";
+import MyWeeklyStudies from "../components/myStudyFarm/MyWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
 
 import { firebaseService } from "../api/firebaseService";
