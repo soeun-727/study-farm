@@ -95,7 +95,7 @@ export default function MyWeeklyStudies({
     });
 
     Object.keys(grouped).forEach((day) => {
-      grouped[day].sort((a, b) => a.startTime.localeCompare(a.startTime));
+      grouped[day].sort((a, b) => b.startTime.localeCompare(a.startTime));
     });
 
     return grouped;
