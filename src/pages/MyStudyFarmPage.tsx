@@ -13,6 +13,15 @@ export default function MyStudyFarmPage() {
   const [weeklyRecords, setWeeklyRecords] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const loadWeeklyData = async () => {
+    try {
+      const logs = await firebaseService.getStudyLogs();
+      setWeeklyRecords(logs);
+    } catch (error) {
+      console.error("주간 기록 로드 실패:", error);
+    }
+  };
+
   useEffect(() => {
     async function loadFarmData() {
       try {
@@ -34,6 +43,7 @@ export default function MyStudyFarmPage() {
 
     loadFarmData();
   }, []);
+
   if (loading) {
     return (
       <div className="h-screen flex justify-center items-center text-(--primary-brown) typo-h1">
@@ -41,6 +51,7 @@ export default function MyStudyFarmPage() {
       </div>
     );
   }
+
   if (!userStats) {
     return (
       <div className="h-screen flex justify-center items-center text-red-500 typo-h1">
@@ -50,7 +61,7 @@ export default function MyStudyFarmPage() {
   }
 
   return (
-    <div className="h-screen box-border border-t-10 border-b-10 border-r-10 border-(--primary-brown) overflow-hidden">
+    <div className="h-screen box-border border-t-10 border-b-10 border-r-10 border-(--primary-brown) overflow-hidden relative">
       {/* 왼쪽 감지 영역 */}
       <div
         className="fixed left-0 top-0 w-60 h-full z-40"
@@ -61,6 +72,7 @@ export default function MyStudyFarmPage() {
           <LeftArrow className="w-full h-auto animate-bounce-left" />
         </button>
       </div>
+
       <main className="absolute inset-0 flex justify-center items-center">
         {/* 왼쪽 배경 */}
         <div
@@ -73,8 +85,12 @@ export default function MyStudyFarmPage() {
         {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-5 gap-6 z-10">
           <Profile userStats={userStats} />
-          <MyWeeklyStudies weeklyRecords={weeklyRecords} />
+          <MyWeeklyStudies
+            weeklyRecords={weeklyRecords}
+            refreshData={loadWeeklyData} // 자식 모달에서 데이터 수정/삭제 완료 시 바로 호출됨!
+          />
         </div>
+
         {/* 오른쪽 배경 */}
         <div className="w-60 h-full" />
       </main>

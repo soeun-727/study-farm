@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import StudyRecordModal from "../modals/StudyRecordModal";
 import type { Timestamp } from "firebase/firestore";
+import { firebaseService } from "../../api/firebaseService";
 
 export interface StudyLog {
   id?: string;
@@ -12,6 +13,7 @@ export interface StudyLog {
 }
 interface MyWeeklyStudiesProps {
   weeklyRecords?: StudyLog[];
+  refreshData?: () => void;
 }
 
 interface SelectedModalData extends StudyLog {
@@ -20,6 +22,7 @@ interface SelectedModalData extends StudyLog {
 
 export default function MyWeeklyStudies({
   weeklyRecords = [],
+  refreshData,
 }: MyWeeklyStudiesProps) {
   const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentMonth, setCurrentMonth] = useState<number>(0);
@@ -105,6 +108,42 @@ export default function MyWeeklyStudies({
     setIsModalOpen(true);
   };
 
+  const handleSaveRecord = async (
+    updatedContent: string,
+    updatedMemo: string[],
+  ) => {
+    if (!selectedRecord?.id) return;
+
+    try {
+      const memoString = updatedMemo.join("\n");
+
+      await firebaseService.updateStudyLog(selectedRecord.id, {
+        title: updatedContent,
+        memo: memoString,
+      });
+      if (refreshData) {
+        await refreshData();
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      alert("수정사항을 저장하지 못했습니다.");
+    }
+  };
+
+  const handleCancelRecord = async () => {
+    if (!selectedRecord?.id) return;
+
+    try {
+      await firebaseService.deleteStudyLog(selectedRecord.id);
+      if (refreshData) {
+        await refreshData();
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      alert("기록 삭제에 실패했습니다.");
+    }
+  };
+
   const formatStudyTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -176,8 +215,8 @@ export default function MyWeeklyStudies({
           studyContent={selectedRecord.title || ""}
           memo={selectedRecord.memo ? [selectedRecord.memo] : []}
           onClose={() => setIsModalOpen(false)}
-          onDelete={() => setIsModalOpen(false)}
-          onSave={() => setIsModalOpen(false)}
+          onDelete={handleCancelRecord}
+          onSave={handleSaveRecord}
         />
       )}
     </div>

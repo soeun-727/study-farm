@@ -7,6 +7,8 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { UserData, StudyLog } from "../constants/firebase";
@@ -69,6 +71,34 @@ export const firebaseService = {
       }
     } catch (error) {
       console.error("타이머 데이터 저장 실패:", error);
+      throw error;
+    }
+  },
+
+  // 공부 기록 수정 API
+  async updateStudyLog(
+    logId: string,
+    updatedData: { title: string; memo: string },
+  ) {
+    try {
+      const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
+      await updateDoc(logRef, {
+        title: updatedData.title,
+        memo: updatedData.memo,
+      });
+    } catch (error) {
+      console.error("공부 기록 수정 실패:", error);
+      throw error;
+    }
+  },
+
+  // 공부 기록 삭제 API
+  async deleteStudyLog(logId: string) {
+    try {
+      const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
+      await deleteDoc(logRef);
+    } catch (error) {
+      console.error("공부 기록 삭제 실패:", error);
       throw error;
     }
   },
