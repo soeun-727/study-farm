@@ -79,28 +79,26 @@ export default function HomePage() {
   };
 
   const handleStop = async () => {
-    setTimerState("STOP");
-    const durationMinutes = Math.floor(seconds / 60);
-
-    if (durationMinutes < 1) {
-      alert("1분 미만으로 공부한 시간은 농장에 반영되지 않습니다.");
-      return;
+    setTimerState("PAUSED");
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
 
-    const studyTitle = prompt("오늘 어떤 공부를 하셨나요?") || "자율 학습";
-    const studyMemo = prompt("간단한 메모를 남겨주세요.") || "";
-
+    const durationMinutes = Math.floor(seconds / 60);
+    if (durationMinutes < 1) {
+      alert(
+        "1분 미만으로 공부한 시간은 농장에 반영되지 않습니다. 이어서 조금만 더 힘내볼까요? 👨‍🌾",
+      );
+      return;
+    }
     try {
       await firebaseService.saveStudyLog({
         startTime: startTimeRef.current,
-        title: studyTitle,
+        title: "",
         duration: durationMinutes,
-        memo: studyMemo,
+        memo: "",
       });
-
-      alert(
-        `성공적으로 저장되었습니다! 작물이 ${durationMinutes}분만큼 자라났습니다. ✨`,
-      );
 
       await fetchTimerData();
     } catch (error) {
@@ -110,34 +108,38 @@ export default function HomePage() {
 
   return (
     <div className="h-screen box-border border-t-10 border-b-10 border-(--primary-brown) overflow-hidden relative">
-      {/* 왼쪽 감지 영역 */}
-      <div
-        className="fixed left-0 top-0 w-60 h-full z-40"
-        onMouseEnter={() => setHoverSide("left")}
-        onMouseLeave={() => setHoverSide(null)}
-      >
-        <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
-          <LeftArrow className="w-full h-auto animate-bounce-left" />
-        </button>
-      </div>
+      {timerState === "START" && (
+        <>
+          {/* 왼쪽 감지 영역 */}
+          <div
+            className="fixed left-0 top-0 w-60 h-full z-40"
+            onMouseEnter={() => setHoverSide("left")}
+            onMouseLeave={() => setHoverSide(null)}
+          >
+            <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+              <LeftArrow className="w-full h-auto animate-bounce-left" />
+            </button>
+          </div>
 
-      {/* 오른쪽 감지 + 페이지 이동 */}
-      <div
-        className="fixed right-0 top-0 w-60 h-full z-40"
-        onMouseEnter={() => setHoverSide("right")}
-        onMouseLeave={() => setHoverSide(null)}
-      >
-        <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
-          <RightArrow className="w-full h-auto animate-bounce-right" />
-        </button>
-      </div>
+          {/* 오른쪽 감지 + 페이지 이동 */}
+          <div
+            className="fixed right-0 top-0 w-60 h-full z-40"
+            onMouseEnter={() => setHoverSide("right")}
+            onMouseLeave={() => setHoverSide(null)}
+          >
+            <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+              <RightArrow className="w-full h-auto animate-bounce-right" />
+            </button>
+          </div>
+        </>
+      )}
 
       <main className="absolute inset-0 flex justify-center items-center">
         {/* 왼쪽 배경 */}
         <div
           className={`
             w-60 h-full transition-colors duration-300
-            ${hoverSide === "left" ? "bg-(--gray-0)" : ""}
+            ${timerState === "START" && hoverSide === "left" ? "bg-(--gray-0)" : ""}
           `}
         />
 
@@ -170,7 +172,7 @@ export default function HomePage() {
         <div
           className={`
             w-60 h-full transition-colors duration-300
-            ${hoverSide === "right" ? "bg-(--gray-0)" : ""}
+            ${timerState === "START" && hoverSide === "right" ? "bg-(--gray-0)" : ""}
           `}
         />
       </main>
