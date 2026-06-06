@@ -3,7 +3,7 @@ import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 import type { UserData, StudyLog } from "../constants/firebase";
 
-const TEMP_UID = "test_user_123"; // 임시 가짜 UID
+const TEMP_UID = "user_uid";
 
 export const firebaseService = {
   // 유저 프로필 데이터 가져오기
