@@ -2,7 +2,7 @@ import MyCrops from "./MyCrops";
 import MyStats from "./MyStats";
 
 import {
-  CROP_BACKGROUNDS,
+  CROP_DATA_MAP,
   FARMER_COMPONENTS,
 } from "../../constants/profileImageAssets";
 import { CROP_ICONS } from "../../constants/collectedCropAssets";
@@ -36,7 +36,8 @@ export default function Profile({ userStats }: ProfileProps) {
   const days = calculateDays();
 
   const selectedBackground =
-    CROP_BACKGROUNDS[currentCrop] || CROP_BACKGROUNDS["쌀"];
+    CROP_DATA_MAP[currentCrop]?.bg || CROP_DATA_MAP["rice"].bg;
+  const cropNameKO = CROP_DATA_MAP[currentCrop]?.name || "쌀";
   const FarmerComponent = FARMER_COMPONENTS[level] || FARMER_COMPONENTS[1];
   const mappedCropUrls = collectedCrops
     .map((key) => CROP_ICONS[key])
@@ -63,7 +64,7 @@ export default function Profile({ userStats }: ProfileProps) {
         <MyCrops collectedCrops={mappedCropUrls} />
         <MyStats
           nickname={userStats.nickname}
-          currentCrop={userStats.currentCrop}
+          currentCrop={cropNameKO}
           days={days}
           currentLevel={userStats.level}
           cropCount={userStats.cropCount}
