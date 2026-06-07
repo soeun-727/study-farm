@@ -53,8 +53,8 @@ export default function RankingItem({
       <div
         className={`
           flex
-          h-[156px]
-          w-[156px]
+          h-[193px]
+          w-[193px]
           shrink-0
           items-center
           justify-center
@@ -79,7 +79,7 @@ export default function RankingItem({
         <div
           className="
             flex
-            min-h-[91px]
+            min-h-[80px]
             w-[750px]
             items-center
             rounded-t-[12px]
