@@ -1,18 +1,20 @@
-import MyCrops from "./myCrops";
-import MyStats from "./myStats";
+import MyCrops from "./MyCrops";
+import MyStats from "./MyStats";
 
 import {
-  CROP_BACKGROUNDS,
+  CROP_DATA_MAP,
   FARMER_COMPONENTS,
 } from "../../constants/profileImageAssets";
 import { CROP_ICONS } from "../../constants/collectedCropAssets";
+
+import { Timestamp } from "firebase/firestore";
 
 export interface ProfileProps {
   userStats: {
     nickname: string;
     currentCrop: string;
-    days: number;
-    currentLevel: number;
+    createdAt: Timestamp;
+    level: number;
     cropCount: number;
     cropProgress: number;
     collectedCrops?: string[];
@@ -20,11 +22,23 @@ export interface ProfileProps {
 }
 
 export default function Profile({ userStats }: ProfileProps) {
-  const { currentCrop, currentLevel, collectedCrops = [] } = userStats;
+  const { currentCrop, level, collectedCrops = [], createdAt } = userStats;
+
+  const calculateDays = () => {
+    if (!createdAt || typeof createdAt.toDate !== "function") return 1;
+    const createdDate = createdAt.toDate(); // Timestamp를 JS Date 객체로 변환
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays || 1;
+  };
+
+  const days = calculateDays();
+
   const selectedBackground =
-    CROP_BACKGROUNDS[currentCrop] || CROP_BACKGROUNDS["쌀"];
-  const FarmerComponent =
-    FARMER_COMPONENTS[currentLevel] || FARMER_COMPONENTS[1];
+    CROP_DATA_MAP[currentCrop]?.bg || CROP_DATA_MAP["rice"].bg;
+  const cropNameKO = CROP_DATA_MAP[currentCrop]?.name || "쌀";
+  const FarmerComponent = FARMER_COMPONENTS[level] || FARMER_COMPONENTS[1];
   const mappedCropUrls = collectedCrops
     .map((key) => CROP_ICONS[key])
     .filter(Boolean);
@@ -48,7 +62,14 @@ export default function Profile({ userStats }: ProfileProps) {
       {/* 정보 영역 */}
       <div className="flex flex-col justify-between pb-1">
         <MyCrops collectedCrops={mappedCropUrls} />
-        <MyStats {...userStats} />
+        <MyStats
+          nickname={userStats.nickname}
+          currentCrop={cropNameKO}
+          days={days}
+          currentLevel={userStats.level}
+          cropCount={userStats.cropCount}
+          cropProgress={userStats.cropProgress}
+        />
       </div>
     </div>
   );

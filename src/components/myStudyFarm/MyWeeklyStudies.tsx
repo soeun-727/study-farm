@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react";
-import StudyRecordModal from "../modals/StudyRecordModal"; // 🚀 모달 임포트 (프로젝트 경로에 맞게 조정 필요)
+import StudyRecordModal from "../modals/StudyRecordModal";
+import type { Timestamp } from "firebase/firestore";
+import { firebaseService } from "../../api/firebaseService";
 
-export interface StudyRecord {
+export interface StudyLog {
+  id?: string;
+  date: Timestamp;
   startTime: string;
-  content?: string;
-  studyTime?: string;
-  memo?: string[];
+  title: string;
+  duration: number;
+  memo: string;
 }
-
-export type WeeklyRecords = Record<string, StudyRecord[]>;
-
 interface MyWeeklyStudiesProps {
-  weeklyRecords?: WeeklyRecords;
+  weeklyRecords?: StudyLog[];
+  refreshData?: () => void;
 }
 
-interface SelectedModalData extends StudyRecord {
+interface SelectedModalData extends StudyLog {
   dayName: string;
 }
 
 export default function MyWeeklyStudies({
-  weeklyRecords = {},
+  weeklyRecords = [],
+  refreshData,
 }: MyWeeklyStudiesProps) {
   const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentMonth, setCurrentMonth] = useState<number>(0);
@@ -59,9 +62,92 @@ export default function MyWeeklyStudies({
     setCurrentWeek(week);
   }, []);
 
-  const handleRecordClick = (dayName: string, record: StudyRecord) => {
+  const getGroupedRecords = (): Record<string, StudyLog[]> => {
+    const grouped: Record<string, StudyLog[]> = {
+      일: [],
+      월: [],
+      화: [],
+      수: [],
+      목: [],
+      금: [],
+      토: [],
+    };
+
+    const today = new Date();
+    const currentSunday = new Date(
+      today.setDate(today.getDate() - today.getDay()),
+    );
+    currentSunday.setHours(0, 0, 0, 0);
+
+    const currentSaturday = new Date(currentSunday);
+    currentSaturday.setDate(currentSaturday.getDate() + 6);
+    currentSaturday.setHours(23, 59, 59, 999);
+
+    weeklyRecords.forEach((record) => {
+      if (!record.date) return;
+      const recordDate = record.date.toDate();
+
+      if (recordDate >= currentSunday && recordDate <= currentSaturday) {
+        const dayIndex = recordDate.getDay(); // 0(일) ~ 6(토)
+        const dayName = DAYS[dayIndex];
+        grouped[dayName].push(record);
+      }
+    });
+
+    Object.keys(grouped).forEach((day) => {
+      grouped[day].sort((a, b) => b.startTime.localeCompare(a.startTime));
+    });
+
+    return grouped;
+  };
+
+  const groupedWeeklyRecords = getGroupedRecords();
+
+  const handleRecordClick = (dayName: string, record: StudyLog) => {
     setSelectedRecord({ ...record, dayName });
     setIsModalOpen(true);
+  };
+
+  const handleSaveRecord = async (
+    updatedContent: string,
+    updatedMemo: string[],
+  ) => {
+    if (!selectedRecord?.id) return;
+
+    try {
+      const memoString = updatedMemo.join("\n");
+
+      await firebaseService.updateStudyLog(selectedRecord.id, {
+        title: updatedContent,
+        memo: memoString,
+      });
+      if (refreshData) {
+        await refreshData();
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      alert("수정사항을 저장하지 못했습니다.");
+    }
+  };
+
+  const handleCancelRecord = async () => {
+    if (!selectedRecord?.id) return;
+
+    try {
+      await firebaseService.deleteStudyLog(selectedRecord.id);
+      if (refreshData) {
+        await refreshData();
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      alert("기록 삭제에 실패했습니다.");
+    }
+  };
+
+  const formatStudyTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
   };
 
   return (
@@ -80,7 +166,7 @@ export default function MyWeeklyStudies({
       {/* 요일 영역 */}
       <div className="flex justify-between items-center w-full h-full gap-2 overflow-hidden">
         {DAYS.map((day, index) => {
-          const dayRecords = weeklyRecords[day] || [];
+          const dayRecords = groupedWeeklyRecords[day] || [];
           return (
             <div
               key={index}
@@ -104,11 +190,11 @@ export default function MyWeeklyStudies({
                   >
                     <div className="flex gap-1 items-start bg-(--primary-yellow) h-full w-full px-1 typo-body2 flex-1 min-h-0">
                       <span className="font-semibold shrink-0">
-                        {record.startTime.split(":")[0]}시
+                        {Number(record.startTime.split(":")[0])}시{" "}
                       </span>
-                      {record.content && record.content.trim() !== "" && (
+                      {record.title && record.title.trim() !== "" && (
                         <span className="font-normal truncate">
-                          {record.content}
+                          {record.title}
                         </span>
                       )}
                     </div>
@@ -122,19 +208,15 @@ export default function MyWeeklyStudies({
 
       {isModalOpen && selectedRecord && (
         <StudyRecordModal
-          month={currentMonth}
-          day={15}
+          month={selectedRecord.date.toDate().getMonth() + 1}
+          day={selectedRecord.date.toDate().getDate()}
           time={`${selectedRecord.startTime.split(":")[0]}시`}
-          studyTime={selectedRecord.studyTime || "0시간 0분"}
-          studyContent={selectedRecord.content || ""}
-          memo={selectedRecord.memo || []}
+          studyTime={formatStudyTime(selectedRecord.duration)}
+          studyContent={selectedRecord.title || ""}
+          memo={selectedRecord.memo ? [selectedRecord.memo] : []}
           onClose={() => setIsModalOpen(false)}
-          onDelete={() => {
-            setIsModalOpen(false);
-          }}
-          onSave={(_updatedContent, _updatedMemo) => {
-            setIsModalOpen(false);
-          }}
+          onDelete={handleCancelRecord}
+          onSave={handleSaveRecord}
         />
       )}
     </div>

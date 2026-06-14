@@ -7,12 +7,14 @@ interface TimerRunningProps {
   seconds: number;
   currentPlant: string;
   totalProgress: number;
+  studyTime: number;
 }
 
 export default function TimerRunning({
   seconds,
   currentPlant,
   totalProgress,
+  studyTime,
 }: TimerRunningProps) {
   const currentImg = PLANT_BACKGROUNDS[currentPlant] || DEFAULT_BACKGROUND;
 
@@ -21,7 +23,7 @@ export default function TimerRunning({
   const circumference = 2 * Math.PI * radius;
 
   const totalStudySeconds = totalProgress * 60 + seconds; // 분을 초로 바꾸고 타이머 초를 더함
-  const maxSeconds = 100 * 60;
+  const maxSeconds = studyTime * 60;
 
   const percentage = Math.min(totalStudySeconds / maxSeconds, 1);
   const strokeDashoffset = circumference - percentage * circumference;
