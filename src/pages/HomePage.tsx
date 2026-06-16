@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-
 import { LeftArrow, RightArrow } from "../assets/home/homeIndex";
 import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
@@ -7,7 +6,24 @@ import TimerFooter from "../components/home/TimerFooter";
 
 import { firebaseService } from "../api/firebaseService";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../api/firebase"; // 실제 프로젝트의 firebase설정 주소 확인
+import { db } from "../api/firebase";
+
+// 작물 상수 정의
+const CROP_REQUIREMENTS: Record<string, number> = {
+  rice: 30,
+  wheat: 60,
+  sweetPotato: 90,
+  potato: 120,
+  corn: 150,
+};
+const CROP_ORDER = ["rice", "wheat", "sweetPotato", "potato", "corn"];
+const CROP_NAMES: Record<string, string> = {
+  rice: "쌀",
+  wheat: "밀",
+  sweetPotato: "고구마",
+  potato: "감자",
+  corn: "옥수수",
+};
 
 export default function HomePage() {
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
@@ -26,7 +42,6 @@ export default function HomePage() {
   const fetchTimerData = async () => {
     try {
       const userData = await firebaseService.getCurrentUser();
-
       if (userData) {
         const plantId = userData.currentCrop || "rice";
         setCurrentPlant(plantId);
@@ -52,17 +67,45 @@ export default function HomePage() {
       timerRef.current = setInterval(() => {
         setSeconds((prev) => prev + 1);
       }, 1000);
-    } else if (timerState === "STOP" || timerState === "PAUSED") {
+    } else {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
     }
-
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [timerState]);
+
+  useEffect(() => {
+    if (timerState !== "RUNNING" || seconds === 0 || seconds % 60 !== 0) return;
+    let nextProgress = userProgress + 1;
+    let plant = currentPlant;
+    let currentStudyTime = studyTime;
+    let isHarvested = false;
+
+    while (nextProgress >= currentStudyTime) {
+      nextProgress -= currentStudyTime;
+      isHarvested = true;
+
+      console.log(`🎉 ${CROP_NAMES[plant]} 수확 완료!`);
+      alert(`🎉 ${CROP_NAMES[plant]} 수확 완료!`);
+
+      const currentIndex = CROP_ORDER.indexOf(plant);
+      const nextIndex = (currentIndex + 1) % CROP_ORDER.length;
+      plant = CROP_ORDER[nextIndex];
+      currentStudyTime = CROP_REQUIREMENTS[plant] || 60;
+    }
+
+    if (isHarvested) {
+      setUserProgress(nextProgress);
+      setCurrentPlant(plant);
+      setStudyTime(currentStudyTime);
+    } else {
+      setUserProgress(nextProgress);
+    }
+  }, [seconds, timerState]);
 
   const handleStart = () => {
     if (timerState === "START") {
@@ -101,8 +144,12 @@ export default function HomePage() {
         title: "",
         duration: durationMinutes,
         memo: "",
+        currentCrop: currentPlant,
+        cropProgress: userProgress,
       });
 
+      setSeconds(0);
+      setTimerState("START");
       await fetchTimerData();
     } catch (error) {
       alert("데이터 저장에 실패했습니다. 네트워크를 확인하세요.");
@@ -114,7 +161,6 @@ export default function HomePage() {
     <div className="h-screen box-border border-t-10 border-b-10 border-(--primary-brown) overflow-hidden relative">
       {timerState === "START" && (
         <>
-          {/* 왼쪽 감지 영역 */}
           <div
             className="fixed left-0 top-0 w-60 h-full z-40"
             onMouseEnter={() => setHoverSide("left")}
@@ -125,7 +171,6 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* 오른쪽 감지 + 페이지 이동 */}
           <div
             className="fixed right-0 top-0 w-60 h-full z-40"
             onMouseEnter={() => setHoverSide("right")}
@@ -139,7 +184,6 @@ export default function HomePage() {
       )}
 
       <main className="absolute inset-0 flex justify-center items-center">
-        {/* 왼쪽 배경 */}
         <div
           className={`
             w-60 h-full transition-colors duration-300
@@ -147,7 +191,6 @@ export default function HomePage() {
           `}
         />
 
-        {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-2 z-10">
           {(timerState === "START" ||
             timerState === "PAUSED" ||
@@ -172,7 +215,6 @@ export default function HomePage() {
           />
         </div>
 
-        {/* 오른쪽 배경 */}
         <div
           className={`
             w-60 h-full transition-colors duration-300
