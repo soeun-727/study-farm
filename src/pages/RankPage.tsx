@@ -2,21 +2,18 @@ import { useEffect, useState } from "react";
 import RankingItem from "../components/rank/RankingItem";
 import { RightArrow } from "../assets/home/homeIndex";
 import { useNavigate } from "react-router-dom";
+import { firebaseService } from "../api/firebaseService";
+import { CROP_ICONS } from "../constants/collectedCropAssets";
 
-import { db } from "../api/firebase";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
-
-// Firestore에서 가져오는 원본 데이터 구조
 interface FirebaseUser {
   id: string;
+  rank: number;
   nickname: string;
   totalStudyMinutes: number;
   createdAt: any;
   level: number;
   crops: string[];
 }
-
-// 2. [수정] 컴포넌트 내 state에서 사용할 변환된 데이터 구조 정의
 interface RankingData {
   id: string;
   rank: number;
@@ -37,53 +34,60 @@ export default function RankPage() {
     const fetchRanking = async () => {
       try {
         setIsLoading(true);
+        const rawRankingList = await firebaseService.getRankingList();
 
-        // 1. users 컬렉션에서 totalStudyMinutes 내림차순 정렬 쿼리 생성
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, orderBy("totalStudyMinutes", "desc"));
-        const querySnapshot = await getDocs(q);
+        // [수정] 외부에서 오늘 날짜 객체를 하나만 생성해서 공유합니다.
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const now = new Date();
-        const loadedData: RankingData[] = [];
-        let currentRank = 1;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as FirebaseUser;
-
-          // 2. 가입일(joinDays) 계산 로직 (Timestamp 기준)
+        // [수정] 매핑할 때 user의 타입을 FirebaseUser[]에서 온 요소로 지정합니다.
+        const formattedData = (rawRankingList as FirebaseUser[]).map((user) => {
           let joinDays = 1;
-          if (data.createdAt) {
-            const createdDate = data.createdAt.toDate
-              ? data.createdAt.toDate()
-              : new Date(data.createdAt);
-            const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-            joinDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (user.createdAt) {
+            let createdDate: Date;
+            if (typeof user.createdAt.toDate === "function") {
+              createdDate = user.createdAt.toDate();
+            } else {
+              createdDate = new Date(user.createdAt);
+            }
+
+            createdDate.setHours(0, 0, 0, 0);
+
+            const diffTime = today.getTime() - createdDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            joinDays = diffDays > 0 ? diffDays : 1;
           }
 
-          // 3. 유저 레벨에 따른 아바타 이미지 경로 동적 매핑
           const validLevel =
-            data.level >= 1 && data.level <= 4 ? data.level : 1;
+            user.level >= 1 && user.level <= 4 ? user.level : 1;
           const avatarUrl = `src/assets/characters/lv${validLevel}farmer.svg`;
 
-          loadedData.push({
-            id: doc.id,
-            rank: currentRank++,
-            nickname: data.nickname || "익명의 농부",
-            totalStudyMinutes: data.totalStudyMinutes || 0,
+          const mappedCrops = (user.crops || [])
+            .map((cropName: string) => {
+              // [수정] TypeScript가 안심할 수 있도록 keyof 단언 추가
+              return CROP_ICONS[cropName as keyof typeof CROP_ICONS] || "";
+            })
+            .filter((icon: string) => icon !== "");
+
+          return {
+            id: user.id,
+            rank: user.rank,
+            nickname: user.nickname,
+            totalStudyMinutes: user.totalStudyMinutes,
             joinDays: joinDays,
             avatarUrl: avatarUrl,
-            crops: data.crops || [],
-          });
+            crops: mappedCrops,
+          };
         });
 
-        setRankingData(loadedData);
+        setRankingData(formattedData);
       } catch (error) {
-        console.error("Firestore 랭킹 로딩 실패:", error);
+        console.error("랭킹 화면 로딩 오류:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchRanking();
   }, []);
 
@@ -92,7 +96,6 @@ export default function RankPage() {
     navigate("/");
   };
 
-  // 3. [추가] 로딩 중일 때 스피너나 대체 텍스트 노출
   if (isLoading) {
     return (
       <div className="h-screen w-full bg-(--primary-light-brown) flex items-center justify-center text-xl font-bold">
@@ -114,7 +117,6 @@ export default function RankPage() {
 
         {/* 스크롤 영역 */}
         <div className="w-full max-w-[1320px] px-5 flex flex-col mx-auto flex-1 overflow-y-auto pb-15 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {/* 1. [수정] DUMMY_RANKING_DATA 대신 실제 백엔드에서 온 rankingData 사용 */}
           {rankingData.map((item, index) => (
             <div key={item.id} className="w-full flex flex-col items-center">
               <RankingItem
