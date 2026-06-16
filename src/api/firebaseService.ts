@@ -1,4 +1,3 @@
-// src/services/firebaseService.ts 에 추가 또는 확인
 import {
   doc,
   getDoc,
@@ -9,6 +8,8 @@ import {
   serverTimestamp,
   updateDoc,
   deleteDoc,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { UserData, StudyLog } from "../constants/firebase";
@@ -59,10 +60,12 @@ export const firebaseService = {
 
       if (userSnap.exists()) {
         const currentProgress = userSnap.data().cropProgress || 0;
+        const currentTotalMinutes = userSnap.data().totalStudyMinutes || 0;
         await setDoc(
           userRef,
           {
             cropProgress: currentProgress + studyData.duration,
+            totalStudyMinutes: currentTotalMinutes + studyData.duration,
           },
           { merge: true },
         );
@@ -99,6 +102,30 @@ export const firebaseService = {
       await deleteDoc(logRef);
     } catch (error) {
       console.error("공부 기록 삭제 실패:", error);
+      throw error;
+    }
+  },
+  async getRankingList() {
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, orderBy("totalStudyMinutes", "desc"));
+      const querySnapshot = await getDocs(q);
+
+      return querySnapshot.docs.map((doc, index) => {
+        const data = doc.data();
+
+        return {
+          id: doc.id,
+          rank: index + 1,
+          nickname: data.nickname || "익명의 농부",
+          totalStudyMinutes: data.totalStudyMinutes || 0,
+          createdAt: data.createAt,
+          level: data.level || 1,
+          crops: data.collectedCrops || [],
+        };
+      });
+    } catch (error) {
+      console.error("랭킹 데이터 가져오기 실패:", error);
       throw error;
     }
   },
