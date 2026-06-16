@@ -26,7 +26,7 @@ export default function SignUp({ onComplete }: SignUpProps) {
         </h2>
 
         {/* 회원가입 폼 */}
-        <form className="w-full flex flex-col gap-5" onSubmit={(e) => {e.preventDefault(); 
+        <form className="w-full flex flex-col gap-5 items-center" onSubmit={(e) => {e.preventDefault(); 
           onComplete();}}>
           
           {/* 아이디 (이메일) 입력 */}
@@ -112,7 +112,7 @@ export default function SignUp({ onComplete }: SignUpProps) {
             type="submit" 
             size="L" 
             variant="black" 
-            className="w-full mt-4"
+            className="!w-[400px] mt-4"
           >
             완료
           </Button>

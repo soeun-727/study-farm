@@ -16,7 +16,7 @@ export default function Login() {
         </h2>
 
       {/* 로그인 폼 (나중에 onSubmit으로 Firebase 연동) */}
-     <form className="w-full flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+     <form className="w-full flex flex-col gap-5 items-center" onSubmit={(e) => e.preventDefault()}>
 
         {/* 1. 아이디 (이메일) 입력 */}
        <TextField
@@ -68,7 +68,7 @@ export default function Login() {
           type="submit" 
           size="L" 
           variant="black" 
-          className="w-full mt-4"
+          className="!w-[400px] !mx-auto mt-4"
         >
           로그인
         </Button>

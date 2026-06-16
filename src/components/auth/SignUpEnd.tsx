@@ -32,7 +32,7 @@ return (
           onClick={onStart}
           size="L"
           variant="black"
-          className="w-[416px]"
+          className="!w-[400px] mt-4"
         >
             시작하기
         </Button>

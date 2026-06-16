@@ -119,7 +119,7 @@ export default function Welcom({onGoToLogin, onGoToSignUp }: WelcomProps) {
             onClick={onGoToLogin}
             size="L"
             variant="black"
-            className="w-full"
+            className="w-[480px] !mx-auto"
           >
               시작하기
           </Button>
