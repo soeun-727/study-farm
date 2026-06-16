@@ -35,7 +35,7 @@ export default function App() {
         </Route>
 
         {/* 3. 기타 독립 페이지 */}
-        {/* <Route path="/settings" element={<SettingsPage />} /> */}
+        {/* <Routes path="/settings" element={<SettingsPage />} /> */}
       </Routes>
     </Router>
   );
