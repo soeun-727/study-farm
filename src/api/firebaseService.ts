@@ -17,7 +17,6 @@ import type { UserData, StudyLog } from "../constants/firebase";
 const TEMP_UID = "user_uid";
 
 export const firebaseService = {
-  // 유저 프로필 데이터 가져오기
   async getCurrentUser(): Promise<UserData | null> {
     const userRef = doc(db, "users", TEMP_UID);
     const userSnap = await getDoc(userRef);
@@ -27,7 +26,6 @@ export const firebaseService = {
     return null;
   },
 
-  // 유저의 공부 기록 하위 컬렉션 전체 가져오기
   async getStudyLogs(): Promise<StudyLog[]> {
     const logsRef = collection(db, "users", TEMP_UID, "study_logs");
     const querySnapshot = await getDocs(logsRef);
@@ -38,12 +36,15 @@ export const firebaseService = {
     })) as StudyLog[];
   },
 
-  //타이머 api
   async saveStudyLog(studyData: {
     startTime: string;
     title: string;
     duration: number;
     memo: string;
+    currentCrop: string;
+    cropProgress: number;
+    level: number;
+    cropCount: number;
   }) {
     try {
       const logsRef = collection(db, "users", TEMP_UID, "study_logs");
@@ -59,18 +60,47 @@ export const firebaseService = {
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
-        const currentProgress = userSnap.data().cropProgress || 0;
-        const currentTotalMinutes = userSnap.data().totalStudyMinutes || 0;
+        const userData = userSnap.data();
+        const currentTotalMinutes = userData.totalStudyMinutes || 0;
+        let collectedCrops = userData.collectedCrops || [];
+
+        if (
+          userData.currentCrop &&
+          userData.currentCrop !== studyData.currentCrop
+        ) {
+          if (!collectedCrops.includes(userData.currentCrop)) {
+            collectedCrops.push(userData.currentCrop);
+          }
+        }
+
+        if (
+          !collectedCrops.includes(studyData.currentCrop) &&
+          studyData.cropProgress > 0
+        ) {
+          const previousCropIndex =
+            CROP_SCHEME.findIndex((c) => c.id === studyData.currentCrop) - 1;
+          if (previousCropIndex >= 0) {
+            const previousCropId = CROP_SCHEME[previousCropIndex].id;
+            if (!collectedCrops.includes(previousCropId)) {
+              collectedCrops.push(previousCropId);
+            }
+          }
+        }
+
         await setDoc(
           userRef,
           {
-            cropProgress: currentProgress + studyData.duration,
+            currentCrop: studyData.currentCrop,
+            cropProgress: studyData.cropProgress,
             totalStudyMinutes: currentTotalMinutes + studyData.duration,
+            collectedCrops: collectedCrops,
+            cropCount: studyData.cropCount,
+            level: studyData.level,
           },
           { merge: true },
         );
 
-        console.log("DB 저장 및 누적 업데이트 완료!");
+        console.log("DB 저장 및 최종 동기화 완료!");
       }
     } catch (error) {
       console.error("타이머 데이터 저장 실패:", error);
@@ -78,7 +108,6 @@ export const firebaseService = {
     }
   },
 
-  // 공부 기록 수정 API
   async updateStudyLog(
     logId: string,
     updatedData: { title: string; memo: string },
@@ -95,7 +124,6 @@ export const firebaseService = {
     }
   },
 
-  // 공부 기록 삭제 API
   async deleteStudyLog(logId: string) {
     try {
       const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
@@ -105,6 +133,7 @@ export const firebaseService = {
       throw error;
     }
   },
+
   async getRankingList() {
     try {
       const usersRef = collection(db, "users");
@@ -119,7 +148,7 @@ export const firebaseService = {
           rank: index + 1,
           nickname: data.nickname || "익명의 농부",
           totalStudyMinutes: data.totalStudyMinutes || 0,
-          createdAt: data.createAt,
+          createdAt: data.createdAt,
           level: data.level || 1,
           crops: data.collectedCrops || [],
         };
@@ -130,3 +159,19 @@ export const firebaseService = {
     }
   },
 };
+
+const CROP_SCHEME = [
+  { id: "rice" },
+  { id: "wheat" },
+  { id: "potato" },
+  { id: "sweetpotato" },
+  { id: "corn" },
+  { id: "apple" },
+  { id: "strawberry" },
+  { id: "blueberry" },
+  { id: "watermelon" },
+  { id: "banana" },
+  { id: "mango" },
+  { id: "passionfruit" },
+  { id: "starfruit" },
+];

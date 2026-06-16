@@ -2,19 +2,68 @@ import { useState } from 'react';
 import TextField from '../ui/TextField'; 
 import Button from '../ui/Button';
 
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../api/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../api/firebase';
 
 interface SignUpProps {
   onComplete: () => void;
 }
 
 export default function SignUp({ onComplete }: SignUpProps) {
-  // 비밀번호와 비밀번호 확인 입력칸의 눈알(보임/숨김) 상태를 각각 관리합니다.
+  // 비밀번호와 비밀번호 확인 입력칸의 눈알(보임/숨김) 상태를 각각 관리.
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault(); // 새로고침 방지
+
+    // 비밀번호 확인 체크
+    if (password !== passwordConfirm) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    // 비밀번호 길이 체크 
+    if (password.length < 6) {
+      alert('비밀번호는 6자리 이상이어야 합니다.');
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      
+      await setDoc(doc(db, "users", user.uid), {
+        nickname: email.split('@')[0], // 이메일 앞부분을 임시 닉네임으로
+        level: 1,
+        totalStudyMinutes: 0,
+        currentCrop: "rice", // 첫 작물 기본값
+        cropProgress: 0,
+        cropCount: 0,
+        collectedCrops: [],
+        createdAt: serverTimestamp(),
+      });
+
+
+
+      
+      onComplete(); // 회원가입 완료 후 다음 화면(SignUpEnd)으로 넘어가기
+    } catch (error: any) {
+      // 에러 처리 (이미 가입된 이메일이거나 형식이 틀렸을 때)
+      console.error('회원가입 실패:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('이미 사용 중인 이메일입니다.');
+      } else {
+        alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+  };
 
   return (
     <main className="flex-1 bg-(--primary-light-brown) flex flex-col items-center justify-center min-h-screen">
@@ -26,8 +75,7 @@ export default function SignUp({ onComplete }: SignUpProps) {
         </h2>
 
         {/* 회원가입 폼 */}
-        <form className="w-full flex flex-col gap-5 items-center" onSubmit={(e) => {e.preventDefault(); 
-          onComplete();}}>
+        <form className="w-full flex flex-col gap-5 items-center" onSubmit={handleSignUp}>
           
           {/* 아이디 (이메일) 입력 */}
          <TextField
