@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import TextField from '../ui/TextField'; 
+import Button from '../ui/Button';
+
 
 interface SignUpProps {
   onComplete: () => void;
@@ -8,6 +11,10 @@ export default function SignUp({ onComplete }: SignUpProps) {
   // 비밀번호와 비밀번호 확인 입력칸의 눈알(보임/숨김) 상태를 각각 관리합니다.
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
 
   return (
     <main className="flex-1 bg-(--primary-light-brown) flex flex-col items-center justify-center min-h-screen">
@@ -23,43 +30,35 @@ export default function SignUp({ onComplete }: SignUpProps) {
           onComplete();}}>
           
           {/* 아이디 (이메일) 입력 */}
-          <div className="flex flex-col w-full">
-            <label className="typo-label text-(--gray-900) mb-2 ml-1">
-              아이디
-            </label>
-            <div className="relative flex items-center">
-              {/* 왼쪽 편지봉투 아이콘 */}
-              <svg className="absolute left-4 w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <TextField
+            label="아이디"
+            value={email}
+            onChange={setEmail}
+            placeholder="이메일 주소 입력"
+            leftIcon={
+              <svg className="w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <input 
-                type="email" 
-                placeholder="이메일 주소 입력" 
-                className="w-full pl-11 pr-4 py-3.5 bg-(--gray-0) border border-(--gray-200) rounded-xl typo-body2 outline-none focus:border-(--gray-500) transition-colors"
-              />
-            </div>
-          </div>
+            }
+          />
 
           {/* 비밀번호 입력 */}
-          <div className="flex flex-col w-full">
-            <label className="typo-label text-(--gray-900) mb-2 ml-1">
-              비밀번호
-            </label>
-            <div className="relative flex items-center">
-              {/* 왼쪽 열쇠 아이콘 */}
-              <svg className="absolute left-4 w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <TextField
+            label="비밀번호"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={setPassword}
+            placeholder="영문, 숫자 포함 8자 이상의 비밀번호"
+            leftIcon={
+              <svg className="w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
-              <input 
-                type={showPassword ? "text" : "password"} 
-                placeholder="영문, 숫자 포함 8자 이상의 비밀번호" 
-                className="w-full pl-11 pr-12 py-3.5 bg-(--gray-0) border border-(--gray-200) rounded-xl typo-body2 outline-none focus:border-(--gray-500) transition-colors"
-              />
-              {/* 오른쪽 눈알(비밀번호 숨김/표시) 버튼 */}
+            }
+            rightIcon={
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 text-(--gray-400) hover:text-(--gray-600) transition-colors"
+                className="text-(--gray-400) hover:text-(--gray-600) transition-colors flex items-center"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,29 +71,26 @@ export default function SignUp({ onComplete }: SignUpProps) {
                   </svg>
                 )}
               </button>
-            </div>
-          </div>
+            }
+          />
 
           {/* 비밀번호 확인 입력 */}
-          <div className="flex flex-col w-full">
-            <label className="typo-label text-(--gray-900) mb-2 ml-1">
-              비밀번호 확인
-            </label>
-            <div className="relative flex items-center">
-              {/* 왼쪽 열쇠 아이콘 */}
-              <svg className="absolute left-4 w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <TextField
+            label="비밀번호 확인"
+            type={showPasswordConfirm ? "text" : "password"}
+            value={passwordConfirm}
+            onChange={setPasswordConfirm}
+            placeholder="영문, 숫자 포함 8자 이상의 비밀번호"
+            leftIcon={
+              <svg className="w-5 h-5 text-(--gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
-              <input 
-                type={showPasswordConfirm ? "text" : "password"} 
-                placeholder="영문, 숫자 포함 8자 이상의 비밀번호" 
-                className="w-full pl-11 pr-12 py-3.5 bg-(--gray-0) border border-(--gray-200) rounded-xl typo-body2 outline-none focus:border-(--gray-500) transition-colors"
-              />
-              {/* 오른쪽 눈알(비밀번호 숨김/표시) 버튼 */}
+            }
+            rightIcon={
               <button 
                 type="button" 
                 onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                className="absolute right-4 text-(--gray-400) hover:text-(--gray-600) transition-colors"
+                className="text-(--gray-400) hover:text-(--gray-600) transition-colors flex items-center"
               >
                 {showPasswordConfirm ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,16 +103,19 @@ export default function SignUp({ onComplete }: SignUpProps) {
                   </svg>
                 )}
               </button>
-            </div>
-          </div>
+            }
+          />
+
 
           {/* 완료 버튼 */}
-          <button 
-            type="submit"
-            className="w-full mt-4 bg-(--gray-900) text-white typo-button py-5 rounded-2xl transition-all hover:bg-(--gray-800) active:scale-95"
+          <Button 
+            type="submit" 
+            size="L" 
+            variant="black" 
+            className="w-full mt-4"
           >
             완료
-          </button>
+          </Button>
 
         </form>
       </div>

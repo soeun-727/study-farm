@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../ui/Button';
 
 interface WelcomProps {
   onGoToLogin: () => void;
@@ -114,11 +115,14 @@ export default function Welcom({onGoToLogin, onGoToSignUp }: WelcomProps) {
         {/*버튼 & 하단 텍스트 */}
         <div className="w-[480px] flex flex-col items-center mt-6 z-20">
           {/* 시작하기 버튼 */}
-        <button 
+        <Button 
             onClick={onGoToLogin}
-            className="w-full bg-(--gray-900) text-white typo-button py-5 rounded-2xl transition-all hover:bg-(--gray-800) active:scale-95">
-            시작하기
-        </button>
+            size="L"
+            variant="black"
+            className="w-full"
+          >
+              시작하기
+          </Button>
 
         {/* 하단 회원가입 안내 텍스트 */}
         <div className="flex items-center gap-3 mt-4 typo-label">

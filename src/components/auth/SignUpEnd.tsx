@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Button from '../ui/Button';
 
 interface SignUpEndProps {
   onStart: () => void;
@@ -27,11 +28,14 @@ return (
           />
            
      
-        <button 
-        onClick={onStart}
-        className="w-[416px] bg-(--gray-900) text-(--gray-0) typo-button py-5 rounded-2xl transition-all hover:bg-(--gray-800) active:scale-95">
+       <Button 
+          onClick={onStart}
+          size="L"
+          variant="black"
+          className="w-[416px]"
+        >
             시작하기
-        </button>
+        </Button>
         </div>
         </div>
     

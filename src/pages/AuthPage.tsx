@@ -6,12 +6,12 @@ import SignUp from '../components/auth/SignUp';
 import SignUpEnd from '../components/auth/SignUpEnd';
 
 export default function AuthPage() {
-  const [currentView, setCurrentView] = useState('welcome');
+  const [currentView, setCurrentView] = useState<'welcome' | 'login' | 'signup' | 'signupEnd'>('welcome');
+  
 
   const renderView = () => {
     switch (currentView) {
       case 'login':
-        // 💡 로그인 컴포넌트는 아무것도 안 받습니다! (에러 원인 제거)
         return <Login />; 
       case 'signup':
         // 회원가입 완료 시 SignUpEnd로 이동

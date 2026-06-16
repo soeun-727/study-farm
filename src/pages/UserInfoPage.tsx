@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import InputWithButton from '../components/ui/InputWithButton';
 
 //확인을 위한 더미 데이터
 export default function UserInfoPage() {
@@ -31,31 +32,16 @@ export default function UserInfoPage() {
               <label className="typo-label text-(--gray-900) mb-2 ml-1">
                 닉네임
               </label>
-              <div className="relative flex items-center">
-                <input 
-                  type="text" 
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  readOnly={editMode !== 'nickname'}
-                  className={`
-                    w-full pl-4 pr-28 py-3.5 rounded-xl typo-body2 outline-none transition-colors border
-                    ${editMode === 'nickname' 
-                      ? 'bg-(--gray-0) border-(--gray-500) text-(--gray-900)' 
-                      : editMode !== 'none' 
-                        ? 'bg-(--gray-200) border-transparent text-(--gray-500)' 
-                        : 'bg-(--gray-0) border-(--gray-200) text-(--gray-900)'
-                    }
-                  `}
-                />
-                {editMode !== 'password' && (
-                  <button 
-                    onClick={() => editMode === 'nickname' ? handleSave() : setEditMode('nickname')}
-                    className="absolute right-2 bg-(--gray-900) text-(--gray-0) px-4 py-2 rounded-full typo-body transition-all hover:bg-(--gray-800) active:scale-95"
-                  >
-                    {editMode === 'nickname' ? '저장' : '닉네임 변경'}
-                  </button>
-                )}
-              </div>
+              <InputWithButton 
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                readOnly={editMode !== 'nickname'}
+                isDimmed={editMode !== 'none' && editMode !== 'nickname'}
+                buttonText={editMode === 'nickname' ? '저장' : '닉네임 변경'}
+                onButtonClick={() => editMode === 'nickname' ? handleSave() : setEditMode('nickname')}
+                hideButton={editMode === 'password'}
+              />
             </div>
 
             {/* 이메일 필드 */}
@@ -82,31 +68,16 @@ export default function UserInfoPage() {
               <label className="typo-label text-(--gray-900) mb-2 ml-1">
                 비밀번호
               </label>
-              <div className="relative flex items-center">
-                <input 
-                  type={editMode === 'password' ? "text" : "password"} 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  readOnly={editMode !== 'password'}
-                  className={`
-                    w-full pl-4 pr-32 py-3.5 rounded-xl typo-body2 outline-none transition-colors border
-                    ${editMode === 'password' 
-                      ? 'bg-(--gray-0) border-(--gray-500) text-(--gray-900)' 
-                      : editMode !== 'none' 
-                        ? 'bg-(--gray-200) border-transparent text-(--gray-500)' 
-                        : 'bg-(--gray-0) border-(--gray-200) text-(--gray-900)'
-                    }
-                  `}
-                />
-                {editMode !== 'nickname' && (
-                  <button 
-                    onClick={() => editMode === 'password' ? handleSave() : setEditMode('password')}
-                    className="absolute right-2 bg-(--gray-900) text-(--gray-0) px-4 py-2 rounded-full typo-body transition-all hover:bg-(--gray-800) active:scale-95"
-                  >
-                    {editMode === 'password' ? '저장' : '비밀번호 변경'}
-                  </button>
-                )}
-              </div>
+              <InputWithButton 
+                type={editMode === 'password' ? "text" : "password"} 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                readOnly={editMode !== 'password'}
+                isDimmed={editMode !== 'none' && editMode !== 'password'}
+                buttonText={editMode === 'password' ? '저장' : '비밀번호 변경'}
+                onButtonClick={() => editMode === 'password' ? handleSave() : setEditMode('password')}
+                hideButton={editMode === 'nickname'}
+              />
             </div>
           </div>
 
