@@ -1,119 +1,145 @@
-import { useState } from "react";
-import RankingItem from "../components/rank/RankingItem"; 
+import { useEffect, useState } from "react";
+import RankingItem from "../components/rank/RankingItem";
 import { RightArrow } from "../assets/home/homeIndex";
 import { useNavigate } from "react-router-dom";
+import { firebaseService } from "../api/firebaseService";
+import { CROP_ICONS } from "../constants/collectedCropAssets";
 
-//테스트용 더미 데이터
-const DUMMY_RANKING_DATA = [
-  {
-    id: 1,
-    rank: 1,
-    nickname: "공부하는농부님",
-    totalStudyMinutes: 12345,
-    joinDays: 56,
-    avatarUrl: "src/assets/characters/lv1farmer.svg", 
-    crops: [
-      "src/assets/crops/apple.svg",
-      "src/assets/crops/banana.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/corn.svg",
-    ],
-  },
-  {
-    id: 2,
-    rank: 2,
-    nickname: "열공맨",
-    totalStudyMinutes: 9870,
-    joinDays: 45,
-    avatarUrl: "src/assets/characters/lv2farmer.svg",
-    crops: [
-      "src/assets/crops/banana.svg",
-      "src/assets/crops/corn.svg",
-    ],
-  },
-  {
-    id: 3,
-    rank: 3,
-    nickname: "상추도사",
-    totalStudyMinutes: 5430,
-    joinDays: 20,
-    avatarUrl: "src/assets/characters/lv3farmer.svg",
-    crops: [
-      "src/assets/crops/banana.svg",
-      "src/assets/crops/corn.svg",
-    ],
-  },
-   {
-    id: 4,
-    rank: 4,
-    nickname: "열무",
-    totalStudyMinutes: 1170,
-    joinDays: 21,
-    avatarUrl: "src/assets/characters/lv4farmer.svg",
-    crops: [
-      "src/assets/crops/banana.svg",
-      "src/assets/crops/corn.svg",
-      "src/assets/crops/banana.svg",
-    ],
-  },
-];
+interface FirebaseUser {
+  id: string;
+  rank: number;
+  nickname: string;
+  totalStudyMinutes: number;
+  createdAt: any;
+  level: number;
+  crops: string[];
+}
+interface RankingData {
+  id: string;
+  rank: number;
+  nickname: string;
+  totalStudyMinutes: number;
+  joinDays: number;
+  avatarUrl: string;
+  crops: string[];
+}
 
 export default function RankPage() {
-  
+  const [rankingData, setRankingData] = useState<RankingData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   const navigate = useNavigate();
-  
-  // 경로 설정 필요
-  const handleGoBack = () => {
-    console.log("이전 페이지로 이동!"); 
-    navigate('/'); 
-  };
-  
-  return (
-    // 1. 전체 컨테이너: h-screen과 overflow-hidden을 주어 전체 화면 스크롤 방지
-    <div className="h-screen w-full bg-(--primary-light-brown) box-border border-t-10 border-b-10 border-l-10 border-(--primary-brown) flex relative overflow-hidden">
-      
-      {/* 왼쪽 영역 */}
-      <div
-        className={`
-          w-60 shrink-0 transition-colors duration-300 z-10
-        `}
-      />
 
-      {/* 중앙 메인 콘텐츠: h-full 설정, 내부 하단 패딩(pb-15) 제거하고 상단(pt-15)만 유지 */}
+  useEffect(() => {
+    const fetchRanking = async () => {
+      try {
+        setIsLoading(true);
+        const rawRankingList = await firebaseService.getRankingList();
+
+        // [수정] 외부에서 오늘 날짜 객체를 하나만 생성해서 공유합니다.
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // [수정] 매핑할 때 user의 타입을 FirebaseUser[]에서 온 요소로 지정합니다.
+        const formattedData = (rawRankingList as FirebaseUser[]).map((user) => {
+          let joinDays = 1;
+
+          if (user.createdAt) {
+            let createdDate: Date;
+            if (typeof user.createdAt.toDate === "function") {
+              createdDate = user.createdAt.toDate();
+            } else {
+              createdDate = new Date(user.createdAt);
+            }
+
+            createdDate.setHours(0, 0, 0, 0);
+
+            const diffTime = today.getTime() - createdDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            joinDays = diffDays > 0 ? diffDays : 1;
+          }
+
+          const validLevel =
+            user.level >= 1 && user.level <= 4 ? user.level : 1;
+          const avatarUrl = `src/assets/characters/lv${validLevel}farmer.svg`;
+
+          const mappedCrops = (user.crops || [])
+            .map((cropName: string) => {
+              // [수정] TypeScript가 안심할 수 있도록 keyof 단언 추가
+              return CROP_ICONS[cropName as keyof typeof CROP_ICONS] || "";
+            })
+            .filter((icon: string) => icon !== "");
+
+          return {
+            id: user.id,
+            rank: user.rank,
+            nickname: user.nickname,
+            totalStudyMinutes: user.totalStudyMinutes,
+            joinDays: joinDays,
+            avatarUrl: avatarUrl,
+            crops: mappedCrops,
+          };
+        });
+
+        setRankingData(formattedData);
+      } catch (error) {
+        console.error("랭킹 화면 로딩 오류:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchRanking();
+  }, []);
+
+  const handleGoBack = () => {
+    console.log("이전 페이지로 이동!");
+    navigate("/");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full bg-(--primary-light-brown) flex items-center justify-center text-xl font-bold">
+        농부들의 기록을 불러오는 중...🌾
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen w-full bg-(--primary-light-brown) box-border border-t-10 border-b-10 border-l-10 border-(--primary-brown) flex relative overflow-hidden">
+      {/* 왼쪽 영역 */}
+      <div className="w-60 shrink-0 transition-colors duration-300 z-10" />
+
+      {/* 중앙 메인 콘텐츠 */}
       <main className="flex-1 flex flex-col items-center pt-15 h-full">
-        {/* 헤더: shrink-0을 주어 스크롤 박스가 밀어올려도 찌그러지지 않게 고정 */}
         <h1 className="text-(--gray-900) mb-15 typo-h1 shrink-0">
           열공농장 농부 랭킹
         </h1>
 
-        {/* 2. 스크롤 영역: flex-1과 overflow-y-auto를 추가하여 이 안에서만 스크롤되도록 설정. 하단 여백 확보를 위해 pb-15 추가 */}
+        {/* 스크롤 영역 */}
         <div className="w-full max-w-[1320px] px-5 flex flex-col mx-auto flex-1 overflow-y-auto pb-15 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {DUMMY_RANKING_DATA.map((item, index) => (
+          {rankingData.map((item, index) => (
             <div key={item.id} className="w-full flex flex-col items-center">
+              <RankingItem
+                rank={item.rank}
+                nickname={item.nickname}
+                totalStudyMinutes={item.totalStudyMinutes}
+                joinDays={item.joinDays}
+                avatarUrl={item.avatarUrl}
+                crops={item.crops}
+              />
 
-            <RankingItem
-              key={item.id}
-              rank={item.rank}
-              nickname={item.nickname}
-              totalStudyMinutes={item.totalStudyMinutes}
-              joinDays={item.joinDays}
-              avatarUrl={item.avatarUrl}
-              crops={item.crops}
-            />
-
-            {index !== DUMMY_RANKING_DATA.length - 1 && (
+              {index !== rankingData.length - 1 && (
                 <div className="w-full h-[2px] bg-(--gray-400) rounded-full mb-7" />
               )}
-
-        </div>
+            </div>
           ))}
 
-        
+          {/* 농부가 아무도 없을 때 예외 처리 */}
+          {rankingData.length === 0 && (
+            <div className="text-center text-gray-500 mt-20">
+              아직 등록된 농부가 없습니다.
+            </div>
+          )}
         </div>
       </main>
 
@@ -126,14 +152,13 @@ export default function RankPage() {
         onMouseEnter={() => setHoverSide("right")}
         onMouseLeave={() => setHoverSide(null)}
       >
-        <button 
+        <button
           onClick={handleGoBack}
           className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95"
         >
           <RightArrow className="w-full animate-bounce-right" />
         </button>
       </div>
-
     </div>
   );
 }
