@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import Welcom from '../components/auth/Welcom';
 import Login from '../components/auth/Login';

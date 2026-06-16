@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import InputWithButton from '../components/ui/InputWithButton';
 
 //확인을 위한 더미 데이터
