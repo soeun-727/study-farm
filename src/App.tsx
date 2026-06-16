@@ -13,33 +13,30 @@ import RankingDetailPage from "./pages/RankingDetailPage";
 
 export default function App() {
   return (
-    <HomePage />
-    // <Router>
+    <Router>
+      <Routes>
+        {/* 인증 및 초기 진입 경로 지정 전*/}
+        {/* <Route path="/" element={<InitialPage />} /> */}
+        {/* <Route path="/login" element={<LoginPage />} /> */}
 
-    //     <Routes>
-    //       {/* 인증 및 초기 진입 경로 지정 전*/}
-    //       {/* <Route path="/" element={<InitialPage />} /> */}
-    //       {/* <Route path="/login" element={<LoginPage />} /> */}
+        {/* 홈 (타이머 등 메인) */}
+        <Route path="/home" element={<HomePage />} />
 
-    //         {/* 홈 (타이머 등 메인) */}
-    //         <Route path="/home" element={<HomePage />} />
+        {/* 마이 홈 */}
+        <Route path="/mystudyfarm" element={<MyStudyFarmPage />} />
 
-    //         {/* 마이 홈 */}
-    //         <Route path="/mystudyfarm" element={<MyStudyFarmPage />} />
+        {/* 스터디 캘린더 */}
+        <Route path="/calendar" element={<MyCalendarPage />} />
 
-    //         {/* 스터디 캘린더 */}
-    //         <Route path="/calendar" element={<MyCalendarPage />} />
+        {/* 랭킹 */}
+        <Route path="/rank">
+          <Route index element={<RankPage />} />
+          <Route path="detail/:id" element={<RankingDetailPage />} />
+        </Route>
 
-    //         {/* 랭킹 */}
-    //         <Route path="/rank">
-    //           <Route index element={<RankPage />} />
-    //           <Route path="detail/:id" element={<RankingDetailPage />} />
-    //         </Route>
-
-    //       {/* 3. 기타 독립 페이지 */}
-    //       {/* <Routes path="/settings" element={<SettingsPage />} /> */}
-
-    //     </Routes>
-    // </Router>
+        {/* 3. 기타 독립 페이지 */}
+        {/* <Routes path="/settings" element={<SettingsPage />} /> */}
+      </Routes>
+    </Router>
   );
 }
