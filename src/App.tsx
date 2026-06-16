@@ -13,7 +13,6 @@ import UserInfoPage from './pages/UserInfoPage';
 
 export default function App() {
   return (
-    
    
         <Routes>
           {/* 인증 및 초기 진입 경로 지정 전*/}
