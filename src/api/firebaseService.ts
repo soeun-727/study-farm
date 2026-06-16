@@ -43,9 +43,10 @@ export const firebaseService = {
     memo: string;
     currentCrop: string;
     cropProgress: number;
+    level: number;
+    cropCount: number;
   }) {
     try {
-      // 1. 하위 컬렉션에 공부 로그 쌓기
       const logsRef = collection(db, "users", TEMP_UID, "study_logs");
       await addDoc(logsRef, {
         title: studyData.title,
@@ -55,17 +56,14 @@ export const firebaseService = {
         date: serverTimestamp(),
       });
 
-      // 2. 유저 정보 최종 스냅샷 반영
       const userRef = doc(db, "users", TEMP_UID);
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
         const userData = userSnap.data();
         const currentTotalMinutes = userData.totalStudyMinutes || 0;
-        const createdAtValue = userData.createdAt || serverTimestamp();
-
-        // 기존 수확 완료한 작물 리스트 가져오기 (없으면 빈 배열)
         let collectedCrops = userData.collectedCrops || [];
+
         if (
           userData.currentCrop &&
           userData.currentCrop !== studyData.currentCrop
@@ -75,17 +73,29 @@ export const firebaseService = {
           }
         }
 
-        const calculatedLevel = Math.floor(collectedCrops.length / 3) + 1;
-        const finalLevel = calculatedLevel > 4 ? 4 : calculatedLevel;
+        if (
+          !collectedCrops.includes(studyData.currentCrop) &&
+          studyData.cropProgress > 0
+        ) {
+          const previousCropIndex =
+            CROP_SCHEME.findIndex((c) => c.id === studyData.currentCrop) - 1;
+          if (previousCropIndex >= 0) {
+            const previousCropId = CROP_SCHEME[previousCropIndex].id;
+            if (!collectedCrops.includes(previousCropId)) {
+              collectedCrops.push(previousCropId);
+            }
+          }
+        }
+
         await setDoc(
           userRef,
           {
-            currentCrop: studyData.currentCrop, // 실시간 최종 작물 ID 반영
-            cropProgress: studyData.cropProgress, // 실시간 이월 잔여 분 반영
-            totalStudyMinutes: currentTotalMinutes + studyData.duration, // 총 누적 공부 시간
-            collectedCrops: collectedCrops, // 업데이트된 수확 배열
-            level: finalLevel, // 계산된 최종 레벨
-            createdAt: createdAtValue,
+            currentCrop: studyData.currentCrop,
+            cropProgress: studyData.cropProgress,
+            totalStudyMinutes: currentTotalMinutes + studyData.duration,
+            collectedCrops: collectedCrops,
+            cropCount: studyData.cropCount,
+            level: studyData.level,
           },
           { merge: true },
         );
@@ -98,7 +108,6 @@ export const firebaseService = {
     }
   },
 
-  // 공부 기록 수정 API
   async updateStudyLog(
     logId: string,
     updatedData: { title: string; memo: string },
@@ -115,7 +124,6 @@ export const firebaseService = {
     }
   },
 
-  // 공부 기록 삭제 API
   async deleteStudyLog(logId: string) {
     try {
       const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
@@ -126,7 +134,6 @@ export const firebaseService = {
     }
   },
 
-  // 랭킹 페이지용 API (이전 코드 유지)
   async getRankingList() {
     try {
       const usersRef = collection(db, "users");
@@ -152,3 +159,19 @@ export const firebaseService = {
     }
   },
 };
+
+const CROP_SCHEME = [
+  { id: "rice" },
+  { id: "wheat" },
+  { id: "potato" },
+  { id: "sweetpotato" },
+  { id: "corn" },
+  { id: "apple" },
+  { id: "strawberry" },
+  { id: "blueberry" },
+  { id: "watermelon" },
+  { id: "banana" },
+  { id: "mango" },
+  { id: "passionfruit" },
+  { id: "starfruit" },
+];
