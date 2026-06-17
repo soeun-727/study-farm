@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LeftArrow } from "../assets/home/homeIndex";
 import MyWeeklyStudies from "../components/myStudyFarm/MyWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
@@ -7,6 +8,8 @@ import type { UserData, StudyLog } from "../constants/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function MyStudyFarmPage() {
+  const navigate = useNavigate();
+  const [slideDirection, setSlideDirection] = useState<"left" | null>(null);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
 
   const [userStats, setUserStats] = useState<UserData | null>(null);
@@ -50,8 +53,15 @@ export default function MyStudyFarmPage() {
       }
     });
 
-    return () => unsubscribe(); // 컴포넌트 언마운트 시 리스너 해제
+    return () => unsubscribe();
   }, []);
+
+  const handlePageTransition = (targetUrl: string) => {
+    setSlideDirection("left");
+    setTimeout(() => {
+      navigate(targetUrl);
+    }, 300);
+  };
 
   if (loading) {
     return (
@@ -76,12 +86,20 @@ export default function MyStudyFarmPage() {
         onMouseEnter={() => setHoverSide("left")}
         onMouseLeave={() => setHoverSide(null)}
       >
-        <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+        <button
+          onClick={() => handlePageTransition("/home")}
+          className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
+        >
           <LeftArrow className="w-full h-auto animate-bounce-left" />
         </button>
       </div>
 
-      <main className="absolute inset-0 flex justify-center items-center">
+      <main
+        className={`
+          absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-in-out
+          ${slideDirection === "left" ? "translate-x-full" : ""}
+        `}
+      >
         <div
           className={`
             w-60 h-full transition-colors duration-300

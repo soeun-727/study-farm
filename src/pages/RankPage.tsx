@@ -32,6 +32,7 @@ export default function RankPage() {
   const [rankingData, setRankingData] = useState<RankingData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
+  const [slideDirection, setSlideDirection] = useState<"right" | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +50,6 @@ export default function RankPage() {
           if (user.createdAt) {
             let createdDate: Date | null = null;
 
-            // 🚨 [핵심 교정]: 타입별 완벽 예외 방어 파싱 체계 구축
             if (typeof user.createdAt.toDate === "function") {
               createdDate = user.createdAt.toDate();
             } else if (user.createdAt.seconds) {
@@ -63,7 +63,6 @@ export default function RankPage() {
               createdDate = new Date(user.createdAt);
             }
 
-            // 올바른 Date 객체 생성이 완료되었고 NaN이 아닐 때만 차이 계산
             if (createdDate && !isNaN(createdDate.getTime())) {
               createdDate.setHours(0, 0, 0, 0);
 
@@ -109,8 +108,11 @@ export default function RankPage() {
     fetchRanking();
   }, []);
 
-  const handleGoBack = () => {
-    navigate("/");
+  const handlePageTransition = (targetUrl: string) => {
+    setSlideDirection("right");
+    setTimeout(() => {
+      navigate(targetUrl);
+    }, 300);
   };
 
   if (isLoading) {
@@ -125,7 +127,12 @@ export default function RankPage() {
     <div className="h-screen w-full bg-(--primary-light-brown) box-border border-t-10 border-b-10 border-l-10 border-(--primary-brown) flex relative overflow-hidden">
       <div className="w-60 shrink-0 transition-colors duration-300 z-10" />
 
-      <main className="flex-1 flex flex-col items-center pt-15 h-full">
+      <main
+        className={`
+          flex-1 flex flex-col items-center pt-15 h-full transition-transform duration-300 ease-in-out
+          ${slideDirection === "right" ? "-translate-x-full" : ""}
+        `}
+      >
         <h1 className="text-(--gray-900) mb-15 typo-h1 shrink-0">
           열공농장 농부 랭킹
         </h1>
@@ -156,7 +163,7 @@ export default function RankPage() {
 
           {rankingData.length === 0 && (
             <div className="text-center text-gray-500 mt-20">
-              아직 등록된 농부가 없습니다.
+              `아직 등록된 농부가 없습니다.`
             </div>
           )}
         </div>
@@ -171,10 +178,10 @@ export default function RankPage() {
         onMouseLeave={() => setHoverSide(null)}
       >
         <button
-          onClick={handleGoBack}
-          className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95"
+          onClick={() => handlePageTransition("/home")}
+          className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
         >
-          <RightArrow className="w-full animate-bounce-right" />
+          <RightArrow className="w-full h-auto animate-bounce-right" />
         </button>
       </div>
     </div>
