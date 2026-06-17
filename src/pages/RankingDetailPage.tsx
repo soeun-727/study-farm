@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { CROP_ICONS } from "../constants/collectedCropAssets";
 import BackButton from "../components/ui/BackButton";
 
@@ -13,7 +13,6 @@ interface UserDetailRouteState {
 }
 
 export default function RankingDetailPage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const stateData = location.state as UserDetailRouteState | null;
 
@@ -62,10 +61,6 @@ export default function RankingDetailPage() {
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
     return "👨‍🌾";
-  };
-
-  const handleGoBack = () => {
-    navigate(-1);
   };
 
   return (
