@@ -26,7 +26,6 @@ export default function MyStudyFarmPage() {
   };
 
   useEffect(() => {
-    // 🚨 Firebase Auth의 상태 상태를 관찰하는 리스너 등록
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
