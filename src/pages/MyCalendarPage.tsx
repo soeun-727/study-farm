@@ -19,7 +19,7 @@ export default function MyCalendarPage() {
   const [dbLogs, setDbLogs] = useState<StudyLog[]>([]);
   const [apiRecords, setApiRecords] = useState<Record<string, boolean>>({});
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalQueue, setModalQueue] = useState<StudyLog[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<StudyLog | null>(null);
 
   const auth = getAuth();
@@ -70,16 +70,26 @@ export default function MyCalendarPage() {
   const handleDateClick = (dateStr: string) => {
     if (!apiRecords[dateStr]) return;
 
-    const matchedLog = dbLogs.find((log) => {
+    const matchedLogs = dbLogs.filter((log) => {
       if (!log.date) return false;
       const d = log.date.toDate();
       const matchStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
       return matchStr === dateStr;
     });
 
-    if (matchedLog) {
-      setSelectedRecord(matchedLog);
-      setIsModalOpen(true);
+    if (matchedLogs.length > 0) {
+      setModalQueue(matchedLogs);
+      setSelectedRecord(matchedLogs[0]);
+    }
+  };
+
+  const handleCloseModal = () => {
+    const nextQueue = modalQueue.slice(1);
+    setModalQueue(nextQueue);
+    if (nextQueue.length > 0) {
+      setSelectedRecord(nextQueue[0]);
+    } else {
+      setSelectedRecord(null);
     }
   };
 
@@ -95,7 +105,7 @@ export default function MyCalendarPage() {
         title: updatedContent,
         memo: updatedMemo.join("\n"),
       });
-      setIsModalOpen(false);
+      handleCloseModal();
       await fetchCalendarLogs(uid);
     } catch (error) {
       alert("기록을 수정하지 못했습니다.");
@@ -108,7 +118,7 @@ export default function MyCalendarPage() {
 
     try {
       await firebaseService.deleteStudyLog(uid, selectedRecord.id);
-      setIsModalOpen(false);
+      handleCloseModal();
       await fetchCalendarLogs(uid);
     } catch (error) {
       alert("기록을 삭제하지 못했습니다.");
@@ -196,8 +206,8 @@ export default function MyCalendarPage() {
                     className={`
                     absolute top-1/2 -translate-y-1/2 h-[85%] bg-(--primary-yellow) z-0
                     ${hasPrev && hasNext ? "left-[-4px] right-[-4px] rounded-none" : ""}
-                    ${hasPrev && !hasNext ? "left-[-4px] right-[calc(50%-24px)] rounded-r-full" : ""}
-                    ${!hasPrev && hasNext ? "left-[calc(50%-24px)] right-[-4px] rounded-l-full" : ""}
+                    ${hasPrev && !hasNext ? "left-[-4px] right-[-4px] rounded-r-full" : ""}
+                    ${!hasPrev && hasNext ? "left-[-4px] right-[-4px] rounded-l-full" : ""}
                   `}
                   />
                 )}
@@ -218,7 +228,7 @@ export default function MyCalendarPage() {
         </div>
       </div>
 
-      {isModalOpen && selectedRecord && (
+      {modalQueue.length > 0 && selectedRecord && (
         <StudyRecordModal
           month={selectedRecord.date.toDate().getMonth() + 1}
           day={selectedRecord.date.toDate().getDate()}
@@ -226,7 +236,7 @@ export default function MyCalendarPage() {
           studyTime={formatStudyTime(selectedRecord.duration)}
           studyContent={selectedRecord.title || ""}
           memo={selectedRecord.memo ? [selectedRecord.memo] : []}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           onDelete={handleCancelRecord}
           onSave={handleSaveRecord}
         />
