@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import StudyRecordModal from "../modals/StudyRecordModal";
 import type { Timestamp } from "firebase/firestore";
 import { firebaseService } from "../../api/firebaseService";
-
+import { getAuth } from "firebase/auth";
 export interface StudyLog {
   id?: string;
   date: Timestamp;
@@ -24,6 +25,7 @@ export default function MyWeeklyStudies({
   weeklyRecords = [],
   refreshData,
 }: MyWeeklyStudiesProps) {
+  const navigate = useNavigate();
   const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentMonth, setCurrentMonth] = useState<number>(0);
   const [currentWeek, setCurrentWeek] = useState<number>(0);
@@ -88,7 +90,7 @@ export default function MyWeeklyStudies({
       const recordDate = record.date.toDate();
 
       if (recordDate >= currentSunday && recordDate <= currentSaturday) {
-        const dayIndex = recordDate.getDay(); // 0(일) ~ 6(토)
+        const dayIndex = recordDate.getDay();
         const dayName = DAYS[dayIndex];
         grouped[dayName].push(record);
       }
@@ -116,11 +118,15 @@ export default function MyWeeklyStudies({
 
     try {
       const memoString = updatedMemo.join("\n");
+      const auth = getAuth();
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
 
-      await firebaseService.updateStudyLog(selectedRecord.id, {
+      await firebaseService.updateStudyLog(uid, selectedRecord.id, {
         title: updatedContent,
         memo: memoString,
       });
+
       if (refreshData) {
         await refreshData();
       }
@@ -134,7 +140,11 @@ export default function MyWeeklyStudies({
     if (!selectedRecord?.id) return;
 
     try {
-      await firebaseService.deleteStudyLog(selectedRecord.id);
+      const auth = getAuth();
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      await firebaseService.deleteStudyLog(uid, selectedRecord.id);
+
       if (refreshData) {
         await refreshData();
       }
@@ -152,10 +162,12 @@ export default function MyWeeklyStudies({
 
   return (
     <div className="flex flex-col w-230 h-70 bg-(--primary-brown)/50 rounded-[15px] p-4 gap-4">
-      {/* 헤더 영역 */}
       <div className="relative flex items-end justify-center w-full">
-        {/* 추후 캘린더 연결 */}
-        <button className="absolute left-0 typo-caption text-(--gray-0) cursor-pointer">
+        {/* 🚨 버튼 클릭 시 /calendar 경로로 이동 설정 */}
+        <button
+          onClick={() => navigate("/calendar")}
+          className="absolute left-0 typo-caption text-(--gray-0) cursor-pointer"
+        >
           전체 학습 내역 &gt;
         </button>
         <p className="typo-body !font-semibold text-center">
@@ -163,7 +175,6 @@ export default function MyWeeklyStudies({
         </p>
       </div>
 
-      {/* 요일 영역 */}
       <div className="flex justify-between items-center w-full h-full gap-2 overflow-hidden">
         {DAYS.map((day, index) => {
           const dayRecords = groupedWeeklyRecords[day] || [];
@@ -180,7 +191,6 @@ export default function MyWeeklyStudies({
                 {day}
               </span>
 
-              {/* 공부 기록 영역 */}
               <div className="flex flex-col w-full h-full gap-1 pt-2 overflow-hidden">
                 {dayRecords.map((record, rIndex) => (
                   <button
