@@ -75,7 +75,8 @@ export default function RankPage() {
 
           const validLevel =
             user.level >= 1 && user.level <= 4 ? user.level : 1;
-          const avatarUrl = `src/assets/characters/lv${validLevel}farmer.svg`;
+
+          const avatarUrl = `/characters/lv${validLevel}farmer.svg`;
 
           const mappedCrops = (user.crops || [])
             .map(
