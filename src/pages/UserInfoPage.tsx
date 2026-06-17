@@ -16,6 +16,7 @@ import {
   collection,
   getDocs,
 } from "firebase/firestore";
+import BackButton from "../components/ui/BackButton";
 
 export default function UserInfoPage() {
   const navigate = useNavigate();
@@ -132,6 +133,7 @@ export default function UserInfoPage() {
 
   return (
     <div className="flex w-full min-h-screen">
+      <BackButton />
       <div className="w-60 shrink-0 transition-colors duration-300 z-10 bg-(--primary-light-brown)" />
 
       <main className="flex-1 bg-(--primary-light-brown) flex flex-col items-center justify-center min-h-screen">
