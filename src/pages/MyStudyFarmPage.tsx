@@ -4,7 +4,7 @@ import MyWeeklyStudies from "../components/myStudyFarm/MyWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
 import { firebaseService } from "../api/firebaseService";
 import type { UserData, StudyLog } from "../constants/firebase";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function MyStudyFarmPage() {
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
@@ -26,32 +26,32 @@ export default function MyStudyFarmPage() {
   };
 
   useEffect(() => {
-    async function loadFarmData() {
-      try {
-        // 🚨 현재 로그인한 실제 유저의 UID 추출
-        const uid = auth.currentUser?.uid;
-        if (!uid) {
-          console.warn("로그인된 사용자가 없습니다.");
-          setLoading(false);
-          return;
-        }
-        const [userData, logsData] = await Promise.all([
-          firebaseService.getCurrentUser(uid),
-          firebaseService.getStudyLogs(uid),
-        ]);
+    // 🚨 Firebase Auth의 상태 상태를 관찰하는 리스너 등록
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const uid = user.uid;
+          const [userData, logsData] = await Promise.all([
+            firebaseService.getCurrentUser(uid),
+            firebaseService.getStudyLogs(uid),
+          ]);
 
-        if (userData) {
-          setUserStats(userData);
+          if (userData) {
+            setUserStats(userData);
+          }
+          setWeeklyRecords(logsData);
+        } catch (error) {
+          console.error("데이터를 불러오는 중 에러가 발생했습니다:", error);
+        } finally {
+          setLoading(false);
         }
-        setWeeklyRecords(logsData);
-      } catch (error) {
-        console.error("데이터를 불러오는 중 에러가 발생했습니다:", error);
-      } finally {
+      } else {
+        console.warn("로그인된 사용자가 없습니다.");
         setLoading(false);
       }
-    }
+    });
 
-    loadFarmData();
+    return () => unsubscribe(); // 컴포넌트 언마운트 시 리스너 해제
   }, []);
 
   if (loading) {
