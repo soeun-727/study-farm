@@ -4,6 +4,7 @@ import { RightArrow } from "../assets/home/homeIndex";
 import { useNavigate } from "react-router-dom";
 import { firebaseService } from "../api/firebaseService";
 import { CROP_ICONS } from "../constants/collectedCropAssets";
+import { FARMER_COMPONENTS } from "../constants/profileImageAssets";
 
 interface FirebaseUser {
   id: string;
@@ -76,7 +77,9 @@ export default function RankPage() {
           const validLevel =
             user.level >= 1 && user.level <= 4 ? user.level : 1;
 
-          const avatarUrl = `/characters/lv${validLevel}farmer.svg`;
+          // 🚀 제공해주신 FARMER_COMPONENTS 매핑 객체를 활용해 이미지를 안전하게 바인딩합니다.
+          const avatarUrl =
+            FARMER_COMPONENTS[validLevel] || FARMER_COMPONENTS[1];
 
           const mappedCrops = (user.crops || [])
             .map(

@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { CROP_ICONS } from "../constants/collectedCropAssets";
 import BackButton from "../components/ui/BackButton";
+import { FARMER_COMPONENTS } from "../constants/profileImageAssets";
 
 interface UserDetailRouteState {
   id: string;
@@ -63,6 +64,8 @@ export default function RankingDetailPage() {
     return "👨‍🌾";
   };
 
+  const avatarUrl = FARMER_COMPONENTS[userDetail.level] || FARMER_COMPONENTS[1];
+
   return (
     <div className="min-h-screen bg-(--primary-light-brown) relative flex overflow-hidden">
       <BackButton />
@@ -78,7 +81,7 @@ export default function RankingDetailPage() {
         </div>
 
         <img
-          src={`/src/assets/characters/lv${userDetail.level}farmer.svg`}
+          src={avatarUrl}
           alt="농부 아바타"
           className="h-[180px] object-contain mb-3 drop-shadow-md"
         />
