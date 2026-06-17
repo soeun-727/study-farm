@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   startButton,
   startKorean,
@@ -23,6 +24,7 @@ export default function TimerFooter({
   onPause,
   onStop,
 }: TimerFooterProps) {
+  const navigate = useNavigate();
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [hoveredType, setHoveredType] = useState<"pause" | "stop" | null>(null);
 
@@ -33,7 +35,7 @@ export default function TimerFooter({
           onMouseEnter={() => setIsStartHovered(true)}
           onMouseLeave={() => setIsStartHovered(false)}
           onClick={onStart}
-          className="active:scale-95 transition-transform shrink-0"
+          className="active:scale-95 transition-transform shrink-0 cursor-pointer"
         >
           <img
             src={isStartHovered ? startKorean : startButton}
@@ -48,7 +50,7 @@ export default function TimerFooter({
             onMouseEnter={() => setHoveredType("pause")}
             onMouseLeave={() => setHoveredType(null)}
             onClick={onPause}
-            className="active:scale-95 transition-transform shrink-0"
+            className="active:scale-95 transition-transform shrink-0 cursor-pointer"
           >
             <img
               src={hoveredType === "pause" ? pauseKorean : pauseButton}
@@ -59,7 +61,7 @@ export default function TimerFooter({
             onMouseEnter={() => setHoveredType("stop")}
             onMouseLeave={() => setHoveredType(null)}
             onClick={onStop}
-            className="active:scale-95 transition-transform shrink-0"
+            className="active:scale-95 transition-transform shrink-0 cursor-pointer"
           >
             <img
               src={hoveredType === "stop" ? stopKorean : stopButton}
@@ -75,7 +77,7 @@ export default function TimerFooter({
             onMouseEnter={() => setIsStartHovered(true)}
             onMouseLeave={() => setIsStartHovered(false)}
             onClick={onStart}
-            className="active:scale-95 transition-transform shrink-0"
+            className="active:scale-95 transition-transform shrink-0 cursor-pointer"
           >
             <img
               src={isStartHovered ? startKorean : startButton}
@@ -86,7 +88,7 @@ export default function TimerFooter({
             onMouseEnter={() => setHoveredType("stop")}
             onMouseLeave={() => setHoveredType(null)}
             onClick={onStop}
-            className="active:scale-95 transition-transform shrink-0"
+            className="active:scale-95 transition-transform shrink-0 cursor-pointer"
           >
             <img
               src={hoveredType === "stop" ? stopKorean : stopButton}
@@ -96,12 +98,12 @@ export default function TimerFooter({
         </div>
       )}
 
-      {/* 현재는 리셋되도록 작성 */}
       {timerState === "STOP" && (
         <button
           onMouseEnter={() => setIsStartHovered(true)}
           onMouseLeave={() => setIsStartHovered(false)}
-          className="active:scale-95 transition-transform shrink-0"
+          onClick={() => navigate("/mystudyfarm")}
+          className="active:scale-95 transition-transform shrink-0 cursor-pointer"
         >
           <img
             src={isStartHovered ? recordKorean : recordButton}

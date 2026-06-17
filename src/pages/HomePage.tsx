@@ -175,11 +175,13 @@ export default function HomePage() {
   ]);
 
   const handleStart = () => {
-    if (timerState === "START") {
+    if (timerState === "START" || timerState === "STOP") {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, "0");
       const minutes = String(now.getMinutes()).padStart(2, "0");
       startTimeRef.current = `${hours}:${minutes}`;
+      setSeconds(0);
+      currentMinuteRef.current = 0;
     }
     setTimerState("RUNNING");
   };
@@ -223,9 +225,6 @@ export default function HomePage() {
         cropCount: cropCountRef.current,
       });
 
-      setSeconds(0);
-      currentMinuteRef.current = 0;
-      setTimerState("START");
       await fetchTimerData();
     } catch (error) {
       alert("데이터 저장에 실패했습니다. 네트워크를 확인하세요.");
@@ -251,7 +250,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {timerState === "START" && (
+      {(timerState === "START" || timerState === "STOP") && (
         <>
           <div
             className="fixed left-0 top-0 w-60 h-full z-40"
@@ -291,7 +290,7 @@ export default function HomePage() {
         <div
           className={`
             w-60 h-full transition-colors duration-300
-            ${timerState === "START" && hoverSide === "left" ? "bg-(--gray-0)" : ""}
+            ${(timerState === "START" || timerState === "STOP") && hoverSide === "left" ? "bg-(--gray-0)" : ""}
           `}
         />
 
@@ -322,7 +321,7 @@ export default function HomePage() {
         <div
           className={`
             w-60 h-full transition-colors duration-300
-            ${timerState === "START" && hoverSide === "right" ? "bg-(--gray-0)" : ""}
+            ${(timerState === "START" || timerState === "STOP") && hoverSide === "right" ? "bg-(--gray-0)" : ""}
           `}
         />
       </main>
