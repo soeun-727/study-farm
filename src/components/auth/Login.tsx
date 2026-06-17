@@ -2,11 +2,41 @@ import { useState } from 'react';
 import TextField from '../ui/TextField'; 
 import Button from '../ui/Button';
 
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../api/firebase';
+
+
+import { useNavigate } from 'react-router-dom';
+
 export default function Login() {
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // 새로고침 방지
+
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    try {
+      // 파이어베이스에 로그인 요청
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('로그인 성공 유저 정보:', userCredential.user);
+      alert('로그인 성공!');
+      
+      // 로그인 성공 후 메인 페이지로 이동하는 로직
+      navigate('/home');
+
+    } catch (error: any) {
+      console.error('로그인 실패:', error);
+      alert('이메일 또는 비밀번호가 잘못되었습니다.');
+    }
+  };
 
   return (
     <main className="flex-1 bg-(--primary-light-brown) flex flex-col items-center justify-center min-h-screen">
@@ -16,7 +46,7 @@ export default function Login() {
         </h2>
 
       {/* 로그인 폼 (나중에 onSubmit으로 Firebase 연동) */}
-     <form className="w-full flex flex-col gap-5 items-center" onSubmit={(e) => e.preventDefault()}>
+      <form className="w-full flex flex-col gap-5 items-center" onSubmit={handleLogin}>
 
         {/* 1. 아이디 (이메일) 입력 */}
        <TextField

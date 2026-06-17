@@ -34,8 +34,6 @@ export default function App() {
               <Route path="detail/:id" element={<RankingDetailPage />} />
             </Route>
        
-
-          
         </Routes>
   
   );
