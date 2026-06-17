@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { LeftArrow, RightArrow } from "../assets/home/homeIndex";
 import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
 import TimerFooter from "../components/home/TimerFooter";
 import { firebaseService } from "../api/firebaseService";
+import { getAuth } from "firebase/auth";
 
 interface CropScheme {
   id: string;
@@ -30,6 +32,10 @@ const CROP_SCHEME: CropScheme[] = [
 const LEVEL_THRESHOLDS: Record<number, number> = { 1: 2, 2: 3, 3: 4, 4: 4 };
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(
+    null,
+  );
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   const [timerState, setTimerState] = useState<
     "START" | "RUNNING" | "PAUSED" | "STOP"
@@ -50,10 +56,17 @@ export default function HomePage() {
 
   const [cropCount, setCropCount] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
+  const auth = getAuth();
 
   const fetchTimerData = async () => {
     try {
-      const userData = await firebaseService.getCurrentUser();
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        console.warn("로그인된 사용자가 없습니다.");
+        return;
+      }
+
+      const userData = await firebaseService.getCurrentUser(uid);
       if (userData) {
         const plantId = userData.currentCrop || "rice";
         setCurrentPlant(plantId);
@@ -189,11 +202,17 @@ export default function HomePage() {
       );
       return;
     }
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인해 주세요.");
+      setTimerState("PAUSED");
+      return;
+    }
 
     setTimerState("STOP");
 
     try {
-      await firebaseService.saveStudyLog({
+      await firebaseService.saveStudyLog(uid, {
         startTime: startTimeRef.current,
         title: "",
         duration: durationMinutes,
@@ -214,6 +233,16 @@ export default function HomePage() {
     }
   };
 
+  const handlePageTransition = (
+    direction: "left" | "right",
+    targetUrl: string,
+  ) => {
+    setSlideDirection(direction);
+    setTimeout(() => {
+      navigate(targetUrl);
+    }, 300);
+  };
+
   return (
     <div className="h-screen box-border border-t-10 border-b-10 border-(--primary-brown) overflow-hidden relative">
       {toastMessage && (
@@ -229,7 +258,10 @@ export default function HomePage() {
             onMouseEnter={() => setHoverSide("left")}
             onMouseLeave={() => setHoverSide(null)}
           >
-            <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+            <button
+              onClick={() => handlePageTransition("left", "/ranking")}
+              className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
+            >
               <LeftArrow className="w-full h-auto animate-bounce-left" />
             </button>
           </div>
@@ -239,14 +271,23 @@ export default function HomePage() {
             onMouseEnter={() => setHoverSide("right")}
             onMouseLeave={() => setHoverSide(null)}
           >
-            <button className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+            <button
+              onClick={() => handlePageTransition("right", "/mystudyfarm")}
+              className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
+            >
               <RightArrow className="w-full h-auto animate-bounce-right" />
             </button>
           </div>
         </>
       )}
 
-      <main className="absolute inset-0 flex justify-center items-center">
+      <main
+        className={`
+          absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-in-out
+          ${slideDirection === "left" ? "translate-x-full" : ""}
+          ${slideDirection === "right" ? "-translate-x-full" : ""}
+        `}
+      >
         <div
           className={`
             w-60 h-full transition-colors duration-300

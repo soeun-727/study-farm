@@ -14,11 +14,10 @@ import {
 import { db } from "./firebase";
 import type { UserData, StudyLog } from "../constants/firebase";
 
-const TEMP_UID = "user_uid";
-
 export const firebaseService = {
-  async getCurrentUser(): Promise<UserData | null> {
-    const userRef = doc(db, "users", TEMP_UID);
+  async getCurrentUser(uid: string): Promise<UserData | null> {
+    if (!uid) return null;
+    const userRef = doc(db, "users", uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
       return userSnap.data() as UserData;
@@ -26,8 +25,9 @@ export const firebaseService = {
     return null;
   },
 
-  async getStudyLogs(): Promise<StudyLog[]> {
-    const logsRef = collection(db, "users", TEMP_UID, "study_logs");
+  async getStudyLogs(uid: string): Promise<StudyLog[]> {
+    if (!uid) return [];
+    const logsRef = collection(db, "users", uid, "study_logs");
     const querySnapshot = await getDocs(logsRef);
 
     return querySnapshot.docs.map((doc) => ({
@@ -36,18 +36,21 @@ export const firebaseService = {
     })) as StudyLog[];
   },
 
-  async saveStudyLog(studyData: {
-    startTime: string;
-    title: string;
-    duration: number;
-    memo: string;
-    currentCrop: string;
-    cropProgress: number;
-    level: number;
-    cropCount: number;
-  }) {
+  async saveStudyLog(
+    uid: string,
+    studyData: {
+      startTime: string;
+      title: string;
+      duration: number;
+      memo: string;
+      currentCrop: string;
+      cropProgress: number;
+      level: number;
+      cropCount: number;
+    },
+  ) {
     try {
-      const logsRef = collection(db, "users", TEMP_UID, "study_logs");
+      const logsRef = collection(db, "users", uid, "study_logs");
       await addDoc(logsRef, {
         title: studyData.title,
         startTime: studyData.startTime,
@@ -56,7 +59,7 @@ export const firebaseService = {
         date: serverTimestamp(),
       });
 
-      const userRef = doc(db, "users", TEMP_UID);
+      const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
@@ -109,11 +112,12 @@ export const firebaseService = {
   },
 
   async updateStudyLog(
+    uid: string,
     logId: string,
     updatedData: { title: string; memo: string },
   ) {
     try {
-      const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
+      const logRef = doc(db, "users", uid, "study_logs", logId);
       await updateDoc(logRef, {
         title: updatedData.title,
         memo: updatedData.memo,
@@ -124,9 +128,9 @@ export const firebaseService = {
     }
   },
 
-  async deleteStudyLog(logId: string) {
+  async deleteStudyLog(uid: string, logId: string) {
     try {
-      const logRef = doc(db, "users", TEMP_UID, "study_logs", logId);
+      const logRef = doc(db, "users", uid, "study_logs", logId);
       await deleteDoc(logRef);
     } catch (error) {
       console.error("공부 기록 삭제 실패:", error);

@@ -14,6 +14,7 @@ interface FirebaseUser {
   level: number;
   crops: string[];
 }
+
 interface RankingData {
   id: string;
   rank: number;
@@ -22,12 +23,16 @@ interface RankingData {
   joinDays: number;
   avatarUrl: string;
   crops: string[];
+  rawCrops: string[];
+  createdAt: any;
+  level: number;
 }
 
 export default function RankPage() {
   const [rankingData, setRankingData] = useState<RankingData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
+  const [slideDirection, setSlideDirection] = useState<"right" | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,27 +41,36 @@ export default function RankPage() {
         setIsLoading(true);
         const rawRankingList = await firebaseService.getRankingList();
 
-        // [수정] 외부에서 오늘 날짜 객체를 하나만 생성해서 공유합니다.
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // [수정] 매핑할 때 user의 타입을 FirebaseUser[]에서 온 요소로 지정합니다.
         const formattedData = (rawRankingList as FirebaseUser[]).map((user) => {
           let joinDays = 1;
 
           if (user.createdAt) {
-            let createdDate: Date;
+            let createdDate: Date | null = null;
+
             if (typeof user.createdAt.toDate === "function") {
               createdDate = user.createdAt.toDate();
-            } else {
+            } else if (user.createdAt.seconds) {
+              createdDate = new Date(user.createdAt.seconds * 1000);
+            } else if (user.createdAt._seconds) {
+              createdDate = new Date(user.createdAt._seconds * 1000);
+            } else if (
+              typeof user.createdAt === "string" ||
+              typeof user.createdAt === "number"
+            ) {
               createdDate = new Date(user.createdAt);
             }
 
-            createdDate.setHours(0, 0, 0, 0);
+            if (createdDate && !isNaN(createdDate.getTime())) {
+              createdDate.setHours(0, 0, 0, 0);
 
-            const diffTime = today.getTime() - createdDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            joinDays = diffDays > 0 ? diffDays : 1;
+              const diffTime = today.getTime() - createdDate.getTime();
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+              joinDays = diffDays > 0 ? diffDays : 1;
+            }
           }
 
           const validLevel =
@@ -64,10 +78,10 @@ export default function RankPage() {
           const avatarUrl = `src/assets/characters/lv${validLevel}farmer.svg`;
 
           const mappedCrops = (user.crops || [])
-            .map((cropName: string) => {
-              // [수정] TypeScript가 안심할 수 있도록 keyof 단언 추가
-              return CROP_ICONS[cropName as keyof typeof CROP_ICONS] || "";
-            })
+            .map(
+              (cropName: string) =>
+                CROP_ICONS[cropName as keyof typeof CROP_ICONS] || "",
+            )
             .filter((icon: string) => icon !== "");
 
           return {
@@ -78,6 +92,9 @@ export default function RankPage() {
             joinDays: joinDays,
             avatarUrl: avatarUrl,
             crops: mappedCrops,
+            rawCrops: user.crops || [],
+            createdAt: user.createdAt,
+            level: validLevel,
           };
         });
 
@@ -91,9 +108,11 @@ export default function RankPage() {
     fetchRanking();
   }, []);
 
-  const handleGoBack = () => {
-    console.log("이전 페이지로 이동!");
-    navigate("/");
+  const handlePageTransition = (targetUrl: string) => {
+    setSlideDirection("right");
+    setTimeout(() => {
+      navigate(targetUrl);
+    }, 300);
   };
 
   if (isLoading) {
@@ -106,27 +125,35 @@ export default function RankPage() {
 
   return (
     <div className="h-screen w-full bg-(--primary-light-brown) box-border border-t-10 border-b-10 border-l-10 border-(--primary-brown) flex relative overflow-hidden">
-      {/* 왼쪽 영역 */}
       <div className="w-60 shrink-0 transition-colors duration-300 z-10" />
 
-      {/* 중앙 메인 콘텐츠 */}
-      <main className="flex-1 flex flex-col items-center pt-15 h-full">
+      <main
+        className={`
+          flex-1 flex flex-col items-center pt-15 h-full transition-transform duration-300 ease-in-out
+          ${slideDirection === "right" ? "-translate-x-full" : ""}
+        `}
+      >
         <h1 className="text-(--gray-900) mb-15 typo-h1 shrink-0">
           열공농장 농부 랭킹
         </h1>
 
-        {/* 스크롤 영역 */}
         <div className="w-full max-w-[1320px] px-5 flex flex-col mx-auto flex-1 overflow-y-auto pb-15 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {rankingData.map((item, index) => (
             <div key={item.id} className="w-full flex flex-col items-center">
-              <RankingItem
-                rank={item.rank}
-                nickname={item.nickname}
-                totalStudyMinutes={item.totalStudyMinutes}
-                joinDays={item.joinDays}
-                avatarUrl={item.avatarUrl}
-                crops={item.crops}
-              />
+              <div className="w-full">
+                <RankingItem
+                  id={item.id}
+                  rank={item.rank}
+                  nickname={item.nickname}
+                  totalStudyMinutes={item.totalStudyMinutes}
+                  joinDays={item.joinDays}
+                  avatarUrl={item.avatarUrl}
+                  crops={item.crops}
+                  rawCrops={item.rawCrops}
+                  createdAt={item.createdAt}
+                  level={item.level}
+                />
+              </div>
 
               {index !== rankingData.length - 1 && (
                 <div className="w-full h-[2px] bg-(--gray-400) rounded-full mb-7" />
@@ -134,16 +161,14 @@ export default function RankPage() {
             </div>
           ))}
 
-          {/* 농부가 아무도 없을 때 예외 처리 */}
           {rankingData.length === 0 && (
             <div className="text-center text-gray-500 mt-20">
-              아직 등록된 농부가 없습니다.
+              `아직 등록된 농부가 없습니다.`
             </div>
           )}
         </div>
       </main>
 
-      {/* 오른쪽 영역 */}
       <div
         className={`
           w-60 shrink-0 transition-colors duration-300 z-10 relative
@@ -153,10 +178,10 @@ export default function RankPage() {
         onMouseLeave={() => setHoverSide(null)}
       >
         <button
-          onClick={handleGoBack}
-          className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95"
+          onClick={() => handlePageTransition("/home")}
+          className="absolute right-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
         >
-          <RightArrow className="w-full animate-bounce-right" />
+          <RightArrow className="w-full h-auto animate-bounce-right" />
         </button>
       </div>
     </div>

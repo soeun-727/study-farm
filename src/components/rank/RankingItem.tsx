@@ -1,24 +1,30 @@
 import { Link } from "react-router-dom";
 
 interface RankingItemProps {
+  id: string;
   rank: number;
   nickname: string;
   totalStudyMinutes: number;
   joinDays: number;
   avatarUrl: string;
   crops: string[];
+  rawCrops?: string[];
+  createdAt?: any;
+  level?: number;
 }
 
 export default function RankingItem({
+  id,
   rank,
   nickname,
   totalStudyMinutes,
   joinDays,
   avatarUrl,
   crops,
+  rawCrops = [],
+  createdAt,
+  level = 1,
 }: RankingItemProps) {
-  
-  // 랭크별 테두리 색상
   const getRankBorderStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -30,11 +36,10 @@ export default function RankingItem({
     }
   };
 
-  // 랭크별 메달 아이콘 및 배경색
   const getRankBadge = (rank: number) => {
     switch (rank) {
       case 1:
-        return { icon: "🥇", bg: "bg-(--primary-brown)/50" }; 
+        return { icon: "🥇", bg: "bg-(--primary-brown)/50" };
       case 2:
         return { icon: "🥈", bg: "bg-(--primary-brown)/50" };
       case 3:
@@ -48,8 +53,6 @@ export default function RankingItem({
 
   return (
     <div className="flex items-center gap-7 pb-7 w-full">
-      
-      {/* 프로필 카드 (120% 스케일업, 하단 rounded 제거) */}
       <div
         className={`
           flex
@@ -72,10 +75,7 @@ export default function RankingItem({
         </div>
       </div>
 
-      {/* 정보 카드 전체 묶음 */}
       <div className="flex flex-1 flex-col items-center w-full">
-        
-        {/* 상단 카드 (120% 스케일업, 하단 rounded 제거) */}
         <div
           className="
             flex
@@ -88,9 +88,7 @@ export default function RankingItem({
             py-3
           "
         >
-          {/* 고정된 닉네임 영역 (너비 216px 고정으로 세로선 위치 절대 고정) */}
           <div className="flex items-center gap-3.5 w-[216px] shrink-0">
-            {/* 순위 뱃지 (120% 스케일업) */}
             <div
               className={`
                 flex
@@ -110,7 +108,6 @@ export default function RankingItem({
               <span>{rank}위</span>
             </div>
 
-            {/* 닉네임 */}
             <div className="flex items-center typo-body truncate text-(--gray-900)">
               <span className="text-(--primary-brown) typo-body2 truncate max-w-[114px]">
                 {nickname}
@@ -123,26 +120,24 @@ export default function RankingItem({
 
           <div className="typo-body2 text-(--gray-800) flex-1 flex flex-col items-start justify-center gap-1">
             <div className="flex items-center">
-            <div className="text-left">
-              총 공부 시간{" "}
-              <span className="text-(--primary-orange) typo-body2 ">
-                {totalStudyMinutes.toLocaleString()}
-              </span>
-              <span className="typo-body2 text-(--gray-900) mr-2">분!</span>
+              <div className="text-left">
+                총 공부 시간{" "}
+                <span className="text-(--primary-orange) typo-body2 ">
+                  {totalStudyMinutes.toLocaleString()}
+                </span>
+                <span className="typo-body2 text-(--gray-900) mr-2">분!</span>
+              </div>
+              <div className="text-left">
+                농부가 된 지{" "}
+                <span className="text-(--primary-orange) typo-body2">
+                  {joinDays}
+                </span>
+                <span className="typo-body2 text-(--gray-900)">일 째</span> 🌱
+              </div>
             </div>
-            <div className="text-left">
-              농부가 된 지{" "}
-              <span className="text-(--primary-orange) typo-body2">
-                {joinDays}
-              </span>
-              <span className="typo-body2 text-(--gray-900)">일 째</span>{" "}
-              🌱
-            </div>
-          </div>
           </div>
         </div>
 
-              {/* 하단 카드 */}
         <div
           className="
             relative
@@ -157,28 +152,38 @@ export default function RankingItem({
             py-4
             gap-3
           "
-        >    
-          <div className="flex items-center justify-between w-full">              
-            {/* 작물 카드 타이틀 */}
+        >
+          <div className="flex items-center justify-between w-full">
             <span className="typo-caption text-(--gray-0)">
               {nickname}님의 수확한 작물
             </span>
 
-            {/* 전체보기 버튼 */}
+            {/* 🚨 [교정]: 확실한 절대경로 명시 체계(/ranking/${id})로 라우터 유실 완전 방어 */}
             <Link
-              to="../pages/RankDetail" 
+              to={`/ranking/${id}`}
+              state={{
+                id,
+                rank,
+                nickname,
+                totalStudyMinutes,
+                createdAt,
+                level,
+                crops: rawCrops,
+              }}
+              onClick={(e) => e.stopPropagation()}
               className="
                 typo-caption
                 text-(--primary-brown)
                 transition
                 hover:text-white
+                cursor-pointer
               "
             >
               전체 보기 &gt;
-            </Link>   
+            </Link>
           </div>
 
-           <div className="flex w-full py-1 justify-start gap-2">
+          <div className="flex w-full py-1 justify-start gap-2">
             {Array.from({ length: 13 }).map((_, index) => {
               const imgSrc = crops[index];
               return (
@@ -197,7 +202,6 @@ export default function RankingItem({
               );
             })}
           </div>
-
         </div>
       </div>
     </div>

@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LeftArrow } from "../assets/home/homeIndex";
 import MyWeeklyStudies from "../components/myStudyFarm/MyWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
-
 import { firebaseService } from "../api/firebaseService";
 import type { UserData, StudyLog } from "../constants/firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function MyStudyFarmPage() {
+  const navigate = useNavigate();
+  const [slideDirection, setSlideDirection] = useState<"left" | null>(null);
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
 
   const [userStats, setUserStats] = useState<UserData | null>(null);
   const [weeklyRecords, setWeeklyRecords] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const auth = getAuth();
 
   const loadWeeklyData = async () => {
     try {
-      const logs = await firebaseService.getStudyLogs();
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const logs = await firebaseService.getStudyLogs(uid);
       setWeeklyRecords(logs);
     } catch (error) {
       console.error("주간 기록 로드 실패:", error);
@@ -23,26 +29,39 @@ export default function MyStudyFarmPage() {
   };
 
   useEffect(() => {
-    async function loadFarmData() {
-      try {
-        const [userData, logsData] = await Promise.all([
-          firebaseService.getCurrentUser(),
-          firebaseService.getStudyLogs(),
-        ]);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const uid = user.uid;
+          const [userData, logsData] = await Promise.all([
+            firebaseService.getCurrentUser(uid),
+            firebaseService.getStudyLogs(uid),
+          ]);
 
-        if (userData) {
-          setUserStats(userData);
+          if (userData) {
+            setUserStats(userData);
+          }
+          setWeeklyRecords(logsData);
+        } catch (error) {
+          console.error("데이터를 불러오는 중 에러가 발생했습니다:", error);
+        } finally {
+          setLoading(false);
         }
-        setWeeklyRecords(logsData);
-      } catch (error) {
-        console.error("데이터를 불러오는 중 에러가 발생했습니다:", error);
-      } finally {
+      } else {
+        console.warn("로그인된 사용자가 없습니다.");
         setLoading(false);
       }
-    }
+    });
 
-    loadFarmData();
+    return () => unsubscribe();
   }, []);
+
+  const handlePageTransition = (targetUrl: string) => {
+    setSlideDirection("left");
+    setTimeout(() => {
+      navigate(targetUrl);
+    }, 300);
+  };
 
   if (loading) {
     return (
@@ -62,19 +81,25 @@ export default function MyStudyFarmPage() {
 
   return (
     <div className="h-screen box-border border-t-10 border-b-10 border-r-10 border-(--primary-brown) overflow-hidden relative">
-      {/* 왼쪽 감지 영역 */}
       <div
         className="fixed left-0 top-0 w-60 h-full z-40"
         onMouseEnter={() => setHoverSide("left")}
         onMouseLeave={() => setHoverSide(null)}
       >
-        <button className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95">
+        <button
+          onClick={() => handlePageTransition("/home")}
+          className="absolute left-20 top-1/2 -translate-y-1/2 w-15 transition-transform active:scale-95 cursor-pointer"
+        >
           <LeftArrow className="w-full h-auto animate-bounce-left" />
         </button>
       </div>
 
-      <main className="absolute inset-0 flex justify-center items-center">
-        {/* 왼쪽 배경 */}
+      <main
+        className={`
+          absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-in-out
+          ${slideDirection === "left" ? "translate-x-full" : ""}
+        `}
+      >
         <div
           className={`
             w-60 h-full transition-colors duration-300
@@ -82,16 +107,14 @@ export default function MyStudyFarmPage() {
           `}
         />
 
-        {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-5 gap-6 z-10">
           <Profile userStats={userStats} />
           <MyWeeklyStudies
             weeklyRecords={weeklyRecords}
-            refreshData={loadWeeklyData} // 자식 모달에서 데이터 수정/삭제 완료 시 바로 호출됨!
+            refreshData={loadWeeklyData}
           />
         </div>
 
-        {/* 오른쪽 배경 */}
         <div className="w-60 h-full" />
       </main>
     </div>
