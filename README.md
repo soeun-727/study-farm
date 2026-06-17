@@ -1,26 +1,39 @@
-## 📌협업 규칙
+# 실행 방법
 
-1. 셀프 머지 금지 → 팀원 리뷰 후 머지
-2. Git-Flow 전략 사용
+## 1. 로컬에서 실행
 
-   `git flow version`을 통해 Git-flow 자동화 도구 설치되었는지 확인(미설치 시 설치 진행)
+프로젝트 최상위 폴더인 `study-farm/`에서 터미널을 실행한 후 아래 명령어를 순서대로 입력합니다.
 
-   ```bash
-   //사용 예시:
-   git flow init -d //git flow 사용하도록 초기화(최초 1회 필수)
-   git switch develop //develop을 base로 브랜치가 생성되도록
-   git flow feature start onboarding //feature/onboarding이 생성됨
-   ```
+```bash
+pnpm install
+pnpm dev
+```
 
-3. PR 템플릿, 이슈 템플릿, 커밋 컨벤션 지키기
+`pnpm install`은 프로젝트 실행에 필요한 패키지를 설치하는 명령어이며, `pnpm dev`는 개발 서버를 실행하는 명령어입니다. 실행 후 터미널에 출력되는 로컬 주소로 접속하면 서비스를 이용할 수 있습니다.
 
-   ```bash
-   # 커밋 컨벤션
-   feat: 새 기능 추가
-   fix: 버그 수정
-   docs: 문서 수정
-   style: 코드 스타일 변경(들여쓰기 등 포맷, 세미콜론 추가)
-   refactor: 코드 리팩토링
-   test: 테스트 관련 코드 추가 및 수정
-   chore: 설정 변경
-   ```
+## 2. 배포 서버 접속
+
+배포된 서비스는 아래 주소에서 이용할 수 있습니다.
+
+https://studyfarm-project.vercel.app
+
+# 소스코드 구조 설명
+
+본 프로젝트는 Vite 기반의 React 애플리케이션으로, `src` 폴더를 기준으로 기능별 디렉터리를 구성하였습니다.
+
+- `api` : Firebase 연동 및 API 관련 로직
+- `assets` : 이미지, 아이콘 등 정적 리소스
+- `components` : 재사용 가능한 UI 컴포넌트
+- `constants` : 상수 데이터 및 설정값
+- `pages` : 라우팅되는 페이지 단위 컴포넌트
+
+`components` 폴더는 기능별로 세분화하여 관리하였습니다.
+
+- `auth` : 로그인 및 회원가입 관련 컴포넌트
+- `home` : 홈 화면 구성 컴포넌트
+- `myStudyFarm` : 마이스터디팜 화면 구성 컴포넌트
+- `rank` : 랭킹 화면 구성 컴포넌트
+- `ui` : 버튼, 텍스트필드 등 재사용 가능한 공통 UI 컴포넌트
+- `modals` : 프로젝트 전반에서 사용하는 모달 컴포넌트
+
+스타일은 `index.css`에서 전역 스타일을 관리하고, 그 외 UI 스타일은 Tailwind CSS를 활용하여 컴포넌트 단위로 작성하였습니다. 이를 통해 스타일의 재사용성과 유지보수성을 높였습니다.
