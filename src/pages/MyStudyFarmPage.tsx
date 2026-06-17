@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { LeftArrow } from "../assets/home/homeIndex";
 import MyWeeklyStudies from "../components/myStudyFarm/MyWeeklyStudies";
 import Profile from "../components/myStudyFarm/Profile";
-
 import { firebaseService } from "../api/firebaseService";
 import type { UserData, StudyLog } from "../constants/firebase";
+import { getAuth } from "firebase/auth";
 
 export default function MyStudyFarmPage() {
   const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
@@ -12,10 +12,13 @@ export default function MyStudyFarmPage() {
   const [userStats, setUserStats] = useState<UserData | null>(null);
   const [weeklyRecords, setWeeklyRecords] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const auth = getAuth();
 
   const loadWeeklyData = async () => {
     try {
-      const logs = await firebaseService.getStudyLogs();
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const logs = await firebaseService.getStudyLogs(uid);
       setWeeklyRecords(logs);
     } catch (error) {
       console.error("주간 기록 로드 실패:", error);
@@ -25,9 +28,16 @@ export default function MyStudyFarmPage() {
   useEffect(() => {
     async function loadFarmData() {
       try {
+        // 🚨 현재 로그인한 실제 유저의 UID 추출
+        const uid = auth.currentUser?.uid;
+        if (!uid) {
+          console.warn("로그인된 사용자가 없습니다.");
+          setLoading(false);
+          return;
+        }
         const [userData, logsData] = await Promise.all([
-          firebaseService.getCurrentUser(),
-          firebaseService.getStudyLogs(),
+          firebaseService.getCurrentUser(uid),
+          firebaseService.getStudyLogs(uid),
         ]);
 
         if (userData) {
@@ -62,7 +72,6 @@ export default function MyStudyFarmPage() {
 
   return (
     <div className="h-screen box-border border-t-10 border-b-10 border-r-10 border-(--primary-brown) overflow-hidden relative">
-      {/* 왼쪽 감지 영역 */}
       <div
         className="fixed left-0 top-0 w-60 h-full z-40"
         onMouseEnter={() => setHoverSide("left")}
@@ -74,7 +83,6 @@ export default function MyStudyFarmPage() {
       </div>
 
       <main className="absolute inset-0 flex justify-center items-center">
-        {/* 왼쪽 배경 */}
         <div
           className={`
             w-60 h-full transition-colors duration-300
@@ -82,16 +90,14 @@ export default function MyStudyFarmPage() {
           `}
         />
 
-        {/* 중앙 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col items-center px-5 gap-6 z-10">
           <Profile userStats={userStats} />
           <MyWeeklyStudies
             weeklyRecords={weeklyRecords}
-            refreshData={loadWeeklyData} // 자식 모달에서 데이터 수정/삭제 완료 시 바로 호출됨!
+            refreshData={loadWeeklyData}
           />
         </div>
 
-        {/* 오른쪽 배경 */}
         <div className="w-60 h-full" />
       </main>
     </div>

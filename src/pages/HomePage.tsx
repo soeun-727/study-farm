@@ -4,6 +4,7 @@ import TimerDefault from "../components/home/TimerDefault";
 import TimerRunning from "../components/home/TimerRunning";
 import TimerFooter from "../components/home/TimerFooter";
 import { firebaseService } from "../api/firebaseService";
+import { getAuth } from "firebase/auth";
 
 interface CropScheme {
   id: string;
@@ -50,10 +51,17 @@ export default function HomePage() {
 
   const [cropCount, setCropCount] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
+  const auth = getAuth();
 
   const fetchTimerData = async () => {
     try {
-      const userData = await firebaseService.getCurrentUser();
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        console.warn("로그인된 사용자가 없습니다.");
+        return;
+      }
+
+      const userData = await firebaseService.getCurrentUser(uid);
       if (userData) {
         const plantId = userData.currentCrop || "rice";
         setCurrentPlant(plantId);
@@ -189,11 +197,17 @@ export default function HomePage() {
       );
       return;
     }
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인해 주세요.");
+      setTimerState("PAUSED");
+      return;
+    }
 
     setTimerState("STOP");
 
     try {
-      await firebaseService.saveStudyLog({
+      await firebaseService.saveStudyLog(uid, {
         startTime: startTimeRef.current,
         title: "",
         duration: durationMinutes,
