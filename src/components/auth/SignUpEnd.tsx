@@ -1,5 +1,5 @@
 import Button from "../ui/Button";
-import lv1farmerVer3Top from "../assets/characters/lv1farmer_ver3_top.svg";
+import lv1farmerVer3Top from "../../assets/characters/lv1farmer_ver3_top.svg";
 
 interface SignUpEndProps {
   onStart: () => void;
