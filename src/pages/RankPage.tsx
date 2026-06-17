@@ -39,6 +39,7 @@ export default function RankPage() {
       try {
         setIsLoading(true);
         const rawRankingList = await firebaseService.getRankingList();
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -46,17 +47,31 @@ export default function RankPage() {
           let joinDays = 1;
 
           if (user.createdAt) {
-            let createdDate: Date;
+            let createdDate: Date | null = null;
+
+            // 🚨 [핵심 교정]: 타입별 완벽 예외 방어 파싱 체계 구축
             if (typeof user.createdAt.toDate === "function") {
               createdDate = user.createdAt.toDate();
-            } else {
+            } else if (user.createdAt.seconds) {
+              createdDate = new Date(user.createdAt.seconds * 1000);
+            } else if (user.createdAt._seconds) {
+              createdDate = new Date(user.createdAt._seconds * 1000);
+            } else if (
+              typeof user.createdAt === "string" ||
+              typeof user.createdAt === "number"
+            ) {
               createdDate = new Date(user.createdAt);
             }
-            createdDate.setHours(0, 0, 0, 0);
 
-            const diffTime = today.getTime() - createdDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            joinDays = diffDays > 0 ? diffDays : 1;
+            // 올바른 Date 객체 생성이 완료되었고 NaN이 아닐 때만 차이 계산
+            if (createdDate && !isNaN(createdDate.getTime())) {
+              createdDate.setHours(0, 0, 0, 0);
+
+              const diffTime = today.getTime() - createdDate.getTime();
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+              joinDays = diffDays > 0 ? diffDays : 1;
+            }
           }
 
           const validLevel =
@@ -94,20 +109,6 @@ export default function RankPage() {
     fetchRanking();
   }, []);
 
-  const handleUserClick = (item: RankingData) => {
-    navigate(`/ranking/${item.id}`, {
-      state: {
-        id: item.id,
-        rank: item.rank,
-        nickname: item.nickname,
-        totalStudyMinutes: item.totalStudyMinutes,
-        createdAt: item.createdAt,
-        level: item.level,
-        crops: item.rawCrops,
-      },
-    });
-  };
-
   const handleGoBack = () => {
     navigate("/");
   };
@@ -132,17 +133,18 @@ export default function RankPage() {
         <div className="w-full max-w-[1320px] px-5 flex flex-col mx-auto flex-1 overflow-y-auto pb-15 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {rankingData.map((item, index) => (
             <div key={item.id} className="w-full flex flex-col items-center">
-              <div
-                onClick={() => handleUserClick(item)}
-                className="w-full cursor-pointer transition hover:opacity-80"
-              >
+              <div className="w-full">
                 <RankingItem
+                  id={item.id}
                   rank={item.rank}
                   nickname={item.nickname}
                   totalStudyMinutes={item.totalStudyMinutes}
                   joinDays={item.joinDays}
                   avatarUrl={item.avatarUrl}
                   crops={item.crops}
+                  rawCrops={item.rawCrops}
+                  createdAt={item.createdAt}
+                  level={item.level}
                 />
               </div>
 

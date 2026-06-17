@@ -1,12 +1,13 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import BackButtonIcon from "../components/ui/BackButton";
+import { CROP_ICONS } from "../constants/collectedCropAssets";
+import BackButton from "../components/ui/BackButton";
 
 interface UserDetailRouteState {
   id: string;
   rank: number;
   nickname: string;
   totalStudyMinutes: number;
-  createdAt: { seconds: number; nanoseconds: number } | any;
+  createdAt: any;
   level: number;
   crops: string[];
 }
@@ -14,13 +15,15 @@ interface UserDetailRouteState {
 export default function RankingDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const stateData = location.state as UserDetailRouteState | null;
 
-  const userDetail = (location.state as UserDetailRouteState) || {
-    rank: 0,
-    nickname: "익명의 농부",
-    level: 1,
-    createdAt: null,
-    crops: [],
+  const userDetail = {
+    id: stateData?.id || "",
+    rank: stateData?.rank || 0,
+    nickname: stateData?.nickname || "익명의 농부",
+    level: stateData?.level || 1,
+    createdAt: stateData?.createdAt || null,
+    crops: stateData?.crops || [],
   };
 
   const topRowCells = Array.from({ length: 7 });
@@ -29,17 +32,29 @@ export default function RankingDetailPage() {
   const getJoinDays = (createdAt: any) => {
     if (!createdAt) return 1;
 
-    let createdDate: Date;
-    if (createdAt.seconds) {
+    let createdDate: Date | null = null;
+
+    if (typeof createdAt.toDate === "function") {
+      createdDate = createdAt.toDate();
+    } else if (createdAt.seconds) {
       createdDate = new Date(createdAt.seconds * 1000);
-    } else {
+    } else if (createdAt._seconds) {
+      createdDate = new Date(createdAt._seconds * 1000);
+    } else if (typeof createdAt === "string" || typeof createdAt === "number") {
       createdDate = new Date(createdAt);
     }
 
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - createdDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays || 1;
+    if (createdDate && !isNaN(createdDate.getTime())) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      createdDate.setHours(0, 0, 0, 0);
+
+      const diffTime = today.getTime() - createdDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      return diffDays > 0 ? diffDays : 1;
+    }
+
+    return 1;
   };
 
   const getRankBadge = (rank: number) => {
@@ -55,12 +70,7 @@ export default function RankingDetailPage() {
 
   return (
     <div className="min-h-screen bg-(--primary-light-brown) relative flex overflow-hidden">
-      <button
-        onClick={handleGoBack}
-        className="absolute top-8 left-0 cursor-pointer transition hover:opacity-70 scale-90"
-      >
-        <BackButtonIcon />
-      </button>
+      <BackButton />
 
       <div className="w-60 shrink-0 z-10" />
 
@@ -95,14 +105,16 @@ export default function RankingDetailPage() {
           <div className="flex justify-start gap-3 w-fit">
             {topRowCells.map((_, index) => {
               const cropId = userDetail.crops[index];
+              const cropImgSrc = CROP_ICONS[cropId as keyof typeof CROP_ICONS];
+
               return (
                 <div
                   key={`top-${index}`}
                   className="flex items-center justify-center w-[45px] h-[45px]"
                 >
-                  {cropId && (
+                  {cropImgSrc && (
                     <img
-                      src={`/src/assets/crops/${cropId}.svg`}
+                      src={cropImgSrc}
                       className="w-[45px] h-[45px] object-contain hover:scale-110 transition-transform"
                       alt={cropId}
                     />
@@ -116,14 +128,16 @@ export default function RankingDetailPage() {
             {bottomRowCells.map((_, index) => {
               const actualIndex = index + 7;
               const cropId = userDetail.crops[actualIndex];
+              const cropImgSrc = CROP_ICONS[cropId as keyof typeof CROP_ICONS];
+
               return (
                 <div
                   key={`bottom-${index}`}
                   className="flex items-center justify-center w-[45px] h-[45px]"
                 >
-                  {cropId && (
+                  {cropImgSrc && (
                     <img
-                      src={`/src/assets/crops/${cropId}.svg`}
+                      src={cropImgSrc}
                       className="w-[45px] h-[45px] object-contain hover:scale-110 transition-transform"
                       alt={cropId}
                     />

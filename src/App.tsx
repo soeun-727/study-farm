@@ -29,10 +29,8 @@ export default function App() {
       <Route path="/calendar" element={<MyCalendarPage />} />
 
       {/* 랭킹 */}
-      <Route path="/rank">
-        <Route index element={<RankPage />} />
-        <Route path="detail/:id" element={<RankingDetailPage />} />
-      </Route>
+      <Route path="/ranking" element={<RankPage />} />
+      <Route path="/ranking/:id" element={<RankingDetailPage />} />
     </Routes>
   );
 }
