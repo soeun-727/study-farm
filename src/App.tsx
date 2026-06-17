@@ -1,36 +1,87 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./api/AuthContext";
 
-// Pages 임포트
 import HomePage from "./pages/HomePage";
 import MyCalendarPage from "./pages/MyCalendarPage";
 import MyStudyFarmPage from "./pages/MyStudyFarmPage";
 import RankPage from "./pages/RankPage";
 import RankingDetailPage from "./pages/RankingDetailPage";
-
-// Auth 관련 페이지 임포트
 import AuthPage from "./pages/AuthPage";
 import UserInfoPage from "./pages/UserInfoPage";
 
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return user ? <>{children}</> : <Navigate to="/" replace />;
+}
+
 export default function App() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-(--primary-light-brown) text-xl font-bold">
+        잠시만 기다려주세요...👨‍🌾
+      </div>
+    );
+  }
+
   return (
     <Routes>
-      {/* 인증 및 초기 진입 경로 지정 전*/}
-      <Route path="/" element={<AuthPage />} />
-      <Route path="/userinfo" element={<UserInfoPage />} />
+      {/* 비로그인 진입로 */}
+      <Route
+        path="/"
+        element={user ? <Navigate to="/home" replace /> : <AuthPage />}
+      />
 
-      {/* 홈 (타이머 등 메인) */}
-      <Route path="/home" element={<HomePage />} />
+      {/* 로그인 필수 보호 경로들 */}
+      <Route
+        path="/home"
+        element={
+          <PrivateRoute>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <UserInfoPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mystudyfarm"
+        element={
+          <PrivateRoute>
+            <MyStudyFarmPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/calendar"
+        element={
+          <PrivateRoute>
+            <MyCalendarPage />
+          </PrivateRoute>
+        }
+      />
 
-      {/* 마이 홈 */}
-      <Route path="/mystudyfarm" element={<MyStudyFarmPage />} />
-      <Route path="/settings" element={<UserInfoPage />} />
-
-      {/* 스터디 캘린더 */}
-      <Route path="/calendar" element={<MyCalendarPage />} />
-
-      {/* 랭킹 */}
-      <Route path="/ranking" element={<RankPage />} />
-      <Route path="/ranking/:id" element={<RankingDetailPage />} />
+      <Route
+        path="/ranking"
+        element={
+          <PrivateRoute>
+            <RankPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/ranking/:id"
+        element={
+          <PrivateRoute>
+            <RankingDetailPage />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
